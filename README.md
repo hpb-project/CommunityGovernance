@@ -1,2 +1,2 @@
-# CommunityGovernance
+# Governance
 community covernance tools.
