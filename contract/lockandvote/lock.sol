@@ -1,5 +1,6 @@
 pragma solidity ^0.5.1;
-import "./BoelistandLocklist.sol";
+import "./nodes.sol";
+import "./safemath.sol";
 
 contract HpbNodeLockContract is Ownable{
     using SafeMath for uint256;
@@ -96,22 +97,4 @@ contract HpbNodeLockContractFactory{
     emit NewHpbNodeLockContract(address(hpbNodeLockContract));
     return address(hpbNodeLockContract);
   }
-}
-library SafeMath {
-    /**
-     * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is
-     *      greater than minuend).
-     */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        assert(b <= a);
-        return a - b;
-    }
-    /**
-     * @dev Adds two numbers, throws on overflow.
-     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
-        c = a + b;
-        assert(c >= a);
-        return c;
-    }
 }

@@ -1,21 +1,7 @@
 pragma solidity ^0.5.1;
-import "./BoelistandLocklist.sol";
-contract AdminInterface {
-    function setCapacity(
-        uint _capacity
-    ) public returns(bool);
+import "./nodes.sol";
+import "./safemath.sol";
 
-	function addCoinBase(
-        address payable _coinBase
-    )  public returns(bool);
-    
-    function initHolderAddr(
-        address payable _coinBase,
-        address payable _holderAddr
-    ) public returns(bool);
-    
-    function calVoteResult() public returns(bool);
-}
 contract VoteInterface {
     /**
      * 投票  
@@ -35,20 +21,14 @@ contract VoteInterface {
         uint[] memory nums
     ) public returns(bool);
     
-    function updateCoinBase(
-        address payable _coinBase,
-        address payable _newCoinBase
-    ) public returns(bool);
-    
+    /*
+    *设置持币地址
+    */
     function setHolderAddr(
         address payable _coinBase,
         address payable _holderAddr
     ) public returns(bool);
     
-    function updateCandidateAddr(
-        address payable _candidateAddr, 
-        address payable _newCandidateAddr
-    ) public returns(bool);
     /**
      * 撤回对某个候选人的投票
      */
@@ -59,18 +39,8 @@ contract VoteInterface {
     ) public returns(bool);
 
     function refreshVoteForAll() public;
-    
-    function refreshVoteForVoter(address payable voterAddr) public returns(bool);
-
 }
 contract FetchVoteInterface {
-
-    /**
-     * 获取所有候选人的详细信息
-     */
-    function fetchAllCandidates() public view returns (
-        address payable[] memory
-    );
 
     /**
      * 获取所有投票人的详细信息
@@ -127,73 +97,21 @@ contract FetchVoteInterface {
         address payable[] memory,
         uint[] memory
     );
+
     function getHolderAddr(
-        address payable _coinBase
+        address  _coinBase
     )  public view returns (
-        address payable
+        address 
     );
-    function getAllCoinBases(
-    ) public view returns (
-        address payable[] memory
-    );
-}
-contract Monitor {
-    function doVoted(
-        address payable voterAddr,
-        address payable candidateAddr,
-        uint num,
-        uint blockNumber
-    )public returns(bool);
-}
-library SafeMath {
 
-    /**
-     * @dev Multiplies two numbers, throws on overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
-        // Gas optimization: this is cheaper than asserting 'a' not being zero,
-        // but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-        if (a == 0) {
-            return 0;
-        }
-        c = a * b;
-        assert(c / a == b);
-        return c;
-    }
 
-    /**
-     * @dev Integer division of two numbers, truncating the quotient.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        // assert(b > 0); // Solidity automatically throws when dividing by 0
-        // uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't
-        // hold
-        return a / b;
-    }
+    function fetchAllHolderAddrs() public view returns(
+        address[] memory,
+        address[] memory);
 
-    /**
-     * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is
-     *      greater than minuend).
-     */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        assert(b <= a);
-        return a - b;
-    }
-
-    /**
-     * @dev Adds two numbers, throws on overflow.
-     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
-        c = a + b;
-        assert(c >= a);
-        return c;
-    }
 }
 
-contract NodeBallot is Ownable ,AdminInterface,VoteInterface,FetchVoteInterface {
+contract NodeBallot is Ownable,VoteInterface,FetchVoteInterface {
     using SafeMath for uint256;
 
     HpbNodes boenodes;
@@ -216,7 +134,27 @@ contract NodeBallot is Ownable ,AdminInterface,VoteInterface,FetchVoteInterface 
 		emit SetHolderAddr(msg.sender,_holderAddr);
 		return true;
     }
-    uint public capacity=105;//最终获选者总数（容量，获选者数量上限）默认105个
+
+    function fetchAllHolderAddrs() public view returns(address[] memory,
+        address[] memory){
+            address[] memory nodes = boenodes.getAllBoesAddrs();
+            address[] memory holders = new address[](nodes.length);
+            for(uint i = 0; i < nodes.length; i++){
+                holders[i] = getHolderAddr(nodes[i]);
+            }
+            return (nodes,holders);
+    }
+
+    function getHolderAddr(
+        address  _coinBase
+    )  public view returns (
+        address 
+    ){
+        if(holderMap[_coinBase]==address(0)){
+            return _coinBase;
+        }
+        return holderMap[_coinBase];
+    }
 
     uint _gasLeftLimit=500000;//对于过于复杂操作，无法一步完成，那么必须分步进行
     
@@ -271,7 +209,6 @@ contract NodeBallot is Ownable ,AdminInterface,VoteInterface,FetchVoteInterface 
         }
         return (resinfo,resnum);
     }
-
 
     /**
     *查询所有的节点票数
@@ -550,17 +487,6 @@ contract NodeBallot is Ownable ,AdminInterface,VoteInterface,FetchVoteInterface 
         // 设置默认管理员
         adminMap[owner] = owner;
     }
-    
-	/**
-     * 设置最终获选者总数
-     */
-    function setCapacity(
-        uint _capacity
-    ) onlyAdmin public returns(bool) {
-        capacity = _capacity;
-        return true;
-    }
-    
     
     /**
      * 为了防止因为gas消耗超出而导致本次操作失败

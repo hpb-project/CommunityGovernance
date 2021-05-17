@@ -1,20 +1,10 @@
 pragma solidity ^0.5.1;
 import "./owner.sol";
 
-contract HpbNodesInterface {
-
-    function addHpbNodeBatch(
-        address payable[] memory coinbases, 
-        bytes32[] memory cid1s,
-        bytes32[] memory cid2s,
-        bytes32[] memory hids
-    ) public returns(bool);
-
-}
 /***
  * HPB节点信息
  *  */
-contract HpbNodes is Ownable,HpbNodesInterface{
+contract HpbNodes is Ownable{
     string public name = "HPB Nodes Service";
 	event ReceivedHpb(
         address payable indexed sender, 
@@ -167,16 +157,26 @@ contract HpbNodes is Ownable,HpbNodesInterface{
         }
         return true;
     }
-   
+
+    function getAllBoesAddrs() public view returns(address[] memory){
+        //查询所有的Boe节点
+        uint length=BoeNodes.length;
+        address[] memory _coinbases=new address[](length);
+        for (uint i = 0;i < length;i++){
+            _coinbases[i]=BoeNodes[i].coinbase;
+        }
+        return _coinbases;
+    }
+
     function getAllBoes() public view returns(
-        address payable[] memory,
+        address[] memory,
         bytes32[] memory,
         bytes32[] memory,
         bytes32[] memory
     ){
         //查询所有的Boe节点
         uint length=BoeNodes.length;
-        address payable [] memory _coinbases=new address payable[](length);
+        address[] memory _coinbases=new address[](length);
         bytes32[] memory _cid1s=new bytes32[](length);
         bytes32[] memory _cid2s=new bytes32[](length);
         bytes32[] memory _hids=new bytes32[](length);

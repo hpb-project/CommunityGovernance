@@ -1,19 +1,17 @@
 pragma solidity ^0.5.1;
+import "./safemath.sol";
+import "./owner.sol";
+
 contract AdminInterface {
     function setCapacity(
         uint _capacity
     ) public returns(bool);
 
-	function addCoinBase(
-        address payable _coinBase
-    )  public returns(bool);
-    
     function initHolderAddr(
         address payable _coinBase,
         address payable _holderAddr
     ) public returns(bool);
     
-    function calVoteResult() public returns(bool);
 }
 contract VoteInterface {
     /**
@@ -34,20 +32,11 @@ contract VoteInterface {
         uint[] memory nums
     ) public returns(bool);
     
-    function updateCoinBase(
-        address payable _coinBase,
-        address payable _newCoinBase
-    ) public returns(bool);
-    
     function setHolderAddr(
         address payable _coinBase,
         address payable _holderAddr
     ) public returns(bool);
     
-    function updateCandidateAddr(
-        address payable _candidateAddr, 
-        address payable _newCandidateAddr
-    ) public returns(bool);
     /**
      * 撤回对某个候选人的投票
      */
@@ -59,20 +48,8 @@ contract VoteInterface {
 
     function refreshVoteForAll() public returns(bool);
     
-    function refreshVoteForVoter(address payable voterAddr) public returns(bool);
-
 }
 contract FetchVoteInterface {
-    /**
-     * 是否为竞选阶段
-     */
-	function isRunUpStage() public view returns (bool);
-    /**
-     * 获取所有候选人的详细信息
-     */
-    function fetchAllCandidates() public view returns (
-        address payable[] memory
-    );
 
     /**
      * 获取所有投票人的详细信息
@@ -131,10 +108,7 @@ contract FetchVoteInterface {
     )  public view returns (
         address payable
     );
-    function getAllCoinBases(
-    ) public view returns (
-        address payable[] memory
-    );
+    
 }
 contract HpbNodesInterface {
     function addStage() public returns(bool);
@@ -167,105 +141,7 @@ contract ContractSimpleProxyInterface{
     ) public view returns (address,bytes4);
   
 }
-contract Ownable {
-    address payable public owner;
-    modifier onlyOwner {
-        require(msg.sender == owner);
-        // Do not forget the "_;"! It will be replaced by the actual function
-        // body when the modifier is used.
-        _;
-    }
 
-    function transferOwnership(address payable newOwner) onlyOwner public returns(bool) {
-        owner = newOwner;
-        addAdmin(newOwner);
-        deleteAdmin(owner);
-        return true;
-    }
-
-    function getOwner() public view returns (address payable) {
-        return owner;
-    }
-    // 合约管理员，可以添加和删除候选人
-    mapping (address  => address payable) public adminMap;
-
-    modifier onlyAdmin {
-        require(adminMap[msg.sender] != address(0));
-        _;
-    }
-
-    function addAdmin(address payable addr) onlyOwner public returns(bool) {
-        require(adminMap[addr] == address(0));
-        adminMap[addr] = addr;
-        return true;
-    }
-
-    function deleteAdmin(address payable addr) onlyOwner public returns(bool) {
-        require(adminMap[addr] != address(0));
-        adminMap[addr] = address(0);
-        delete adminMap[addr];
-        return true;
-    }
-}
-library SafeMath {
-    /**
-     * @dev Multiplies two numbers, throws on overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
-        // Gas optimization: this is cheaper than asserting 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-        if (a == 0) {
-            return 0;
-        }
-
-        c = a * b;
-        assert(c / a == b);
-        return c;
-    }
-
-    /**
-     * @dev Integer division of two numbers, truncating the quotient.
-     */
-    function div(
-        uint256 a, 
-        uint256 b
-    ) internal pure returns (
-        uint256
-    ) {
-        // assert(b > 0); // Solidity automatically throws when dividing by 0
-        // uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-        return a / b;
-    }
-
-    /**
-     * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
-     */
-    function sub(
-        uint256 a, 
-        uint256 b
-    ) internal pure returns (
-        uint256
-    ) {
-        assert(b <= a);
-        return a - b;
-    }
-
-    /**
-     * @dev Adds two numbers, throws on overflow.
-     */
-    function add(
-        uint256 a, 
-        uint256 b
-    ) internal pure returns (
-        uint256 c
-    ) {
-        c = a + b;
-        assert(c >= a);
-        return c;
-    }
-}
 contract NodeBallotProx is Ownable{
     using SafeMath for uint256;
     
@@ -327,40 +203,6 @@ contract NodeBallotProx is Ownable{
         );
     }
    
-    
-    function updateCandidateAddr(
-        address payable _candidateAddr, 
-        address payable _newCandidateAddr
-    ) public returns(bool) {
-        return updateCandidateAddrByIndex(nodeBallotAddrs.length - 1, _candidateAddr, _newCandidateAddr);
-    }
-
-    function updateCandidateAddrByIndex(
-        uint index, 
-        address payable _candidateAddr, 
-        address payable _newCandidateAddr
-    )onlyAdmin public returns(bool) {
-        return _getVoteInterface(index).updateCandidateAddr(_candidateAddr, _newCandidateAddr);
-    }
-    
-    function batchUpdateCandidateAddr(
-        address payable[] memory _candidateAddrs,
-        address payable[] memory _newCandidateAddrs
-    ) public returns(bool) {
-        return batchUpdateCandidateAddrByIndex(nodeBallotAddrs.length - 1, _candidateAddrs,_newCandidateAddrs);
-    }
-
-    function batchUpdateCandidateAddrByIndex(
-        uint index, 
-        address payable[] memory _candidateAddrs,
-        address payable[] memory _newCandidateAddrs
-    ) public returns(bool) {
-        for (uint i=0;i < _candidateAddrs.length;i++) {
-            require(updateCandidateAddrByIndex(index, _candidateAddrs[i],_newCandidateAddrs[i]));
-        }
-        return true;
-    }
-
     function setHolderAddr(
         address payable _coinBase,
         address payable _holderAddr
@@ -423,76 +265,6 @@ contract NodeBallotProx is Ownable{
         }
         return true;
     }
- 
-    function addCoinBase(
-        address payable _coinBase
-    ) public returns(bool) {
-        return addCoinBaseByIndex(nodeBallotAddrs.length - 1, _coinBase);
-    }
-    function addCoinBaseByIndex(
-        uint index, 
-        address payable _coinBase
-    )onlyAdmin public returns(bool) {
-        return _getAdminInterface(index).addCoinBase(_coinBase);
-    }
-    
-    function batchAddCoinBase(
-        address payable[] memory _coinBases
-    ) public returns(bool) {
-        return batchAddCoinBaseByIndex(nodeBallotAddrs.length - 1, _coinBases);
-    }
-
-    function batchAddCoinBaseByIndex(
-        uint index, 
-        address payable[] memory _coinBases
-    ) public returns(bool) {
-        for (uint i=0;i < _coinBases.length;i++) {
-            require(addCoinBaseByIndex(index,_coinBases[i]));
-        }
-        return true;
-    }
-    function updateCoinBase(
-        address payable _coinBase,
-        address payable _newCoinBase
-    ) public returns(bool) {
-        return updateCoinBaseByIndex(nodeBallotAddrs.length - 1, _coinBase, _newCoinBase);
-    }
-
-    function updateCoinBaseByIndex(
-        uint index, 
-        address payable _coinBase, 
-        address payable _newCoinBase
-    )onlyAdmin public returns(bool) {
-        return _getVoteInterface(index).updateCoinBase(_coinBase, _newCoinBase);
-    }
-
-    function batchUpdateCoinBase(
-        address payable[] memory _coinBases, 
-        address payable[] memory _newCoinBases
-    ) public returns(bool) {
-        return batchUpdateCoinBaseByIndex(nodeBallotAddrs.length - 1, _coinBases, _newCoinBases);
-    }
-
-    function batchUpdateCoinBaseByIndex(
-        uint index, 
-        address payable[] memory _coinBases, 
-        address payable[] memory _newCoinBases
-    ) public returns(bool) {
-        for (uint i=0;i < _coinBases.length;i++) {
-            require(updateCoinBaseByIndex(index, _coinBases[i], _newCoinBases[i]));
-        }
-        return true;
-    }
-
-    function calVoteResult() public returns(bool) {
-        return calVoteResultByIndex(nodeBallotAddrs.length - 1);
-    }
-
-    function calVoteResultByIndex(
-        uint index
-    )onlyAdmin public returns(bool) {
-        return _getAdminInterface(index).calVoteResult();
-    }
 
     /**
      * 投票  
@@ -539,37 +311,6 @@ contract NodeBallotProx is Ownable{
     ) public returns(bool) {
         return _getVoteInterface(index).refreshVoteForAll();
     }
-    
-    function batchRefreshVoteForVoter(
-        address payable[] memory voterAddrs
-    ) public returns(bool){
-        for (uint i=0;i < voterAddrs.length;i++) {
-            refreshVoteForVoter(voterAddrs[i]);
-        }
-        return true;
-    }
-    function batchRefreshVoteForVoterByIndex(
-        uint index,
-        address payable[] memory voterAddrs
-    ) public returns(bool){
-        for (uint i=0;i < voterAddrs.length;i++) {
-            refreshVoteForVoterByIndex(index,voterAddrs[i]);
-        }
-        return true;
-    }
-    function refreshVoteForVoter(
-        address payable voterAddr
-    ) public returns(bool){
-        return refreshVoteForVoterByIndex(nodeBallotAddrs.length - 1,voterAddr);
-    }
-
-    function refreshVoteForVoterByIndex(
-        uint index,
-        address payable voterAddr
-    ) public returns(bool) {
-        return _getVoteInterface(index).refreshVoteForVoter(voterAddr);
-    }
-  
 
     /**
      * 撤回对某个候选人的投票 Withdraw a vote on a candidate.
@@ -605,23 +346,6 @@ contract NodeBallotProx is Ownable{
             require(_getVoteInterface(index).cancelVoteForCandidate(msg.sender, candidateAddrs[i], nums[i]));
         }
         return true;
-    }
-
-    /**
-     * 获取所有候选人的详细信息
-     */
-    function fetchAllCandidates() public view returns (
-        address payable[] memory
-    ) {
-        return fetchAllCandidatesByIndex(nodeBallotAddrs.length - 1);
-    }
-
-    function fetchAllCandidatesByIndex(
-        uint index
-    ) public view returns (
-        address payable[] memory
-    ) {
-        return _getFetchVoteInterface(index).fetchAllCandidates();
     }
 
 	function fetchAllVoterWithBalance() public view returns (
@@ -831,6 +555,7 @@ contract NodeBallotProx is Ownable{
     ){
         return _getFetchVoteInterface(index).getHolderAddr(_coinBase);
     }
+
     function fetchAllHolderAddrsByIndex(
         uint index
     )  public view returns (
@@ -844,10 +569,11 @@ contract NodeBallotProx is Ownable{
         }
         return (coinbases,holderAddrs);
     }
+
     function fetchAllHolderAddrs(
     )  public view returns (
-        address payable[] memory,
-        address payable[] memory
+        address[] memory,
+        address[] memory
     ){
         return fetchAllHolderAddrsByIndex(nodeBallotAddrs.length - 1);
     }
