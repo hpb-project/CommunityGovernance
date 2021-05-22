@@ -12,10 +12,10 @@ contract gasdiscount {
     	bool voted;
     }
     address[] gasaddrs;
-    address[] proposallist; //ËùÓÐµÄproposalµÄµØÖ·
-    mapping(address => Proposal) proposals; //keyÎªdappµØÖ·
-    mapping(address => Proposal) passedproposal; //keyÎªdappµØÖ·
-    mapping(address => address[]) votes;//keyÎªdapp £¬valueÎªÍ¶Æ±µØÖ·
+    address[] proposallist; //ï¿½ï¿½ï¿½Ðµï¿½proposalï¿½Äµï¿½Ö·
+    mapping(address => Proposal) proposals; //keyÎªdappï¿½ï¿½Ö·
+    mapping(address => Proposal) passedproposal; //keyÎªdappï¿½ï¿½Ö·
+    mapping(address => address[]) votes;//keyÎªdapp ï¿½ï¿½valueÎªÍ¶Æ±ï¿½ï¿½Ö·
 
     
     constructor() public{
@@ -59,6 +59,7 @@ contract gasdiscount {
                     admins[i] = admins[admins.length-1];
                     delete admins[admins.length-1];
                     delete mapadmin[admin];
+                    admins.length--;
                 }
             }
             if (threshold > admins.length){
@@ -109,13 +110,14 @@ contract gasdiscount {
                 if (dappaddr == proposallist[i]){
                     proposallist[i] = proposallist[proposallist.length-1];
                     delete proposallist[proposallist.length-1];
+                    proposallist.length--;
                 }
             }
         }
     }
         
     function deleteproposal(address dappaddr) public {
-        require(superadmin == msg.sender,"Not superadmin");//Ö»ÓÐsuperadminÄÜÉ¾³ý
+        require(superadmin == msg.sender,"Not superadmin");//Ö»ï¿½ï¿½superadminï¿½ï¿½É¾ï¿½ï¿½
         require(proposals[dappaddr].voted == false,"Proposal Voted");
         delete proposals[dappaddr];
         delete votes[dappaddr];
@@ -123,6 +125,7 @@ contract gasdiscount {
             if (dappaddr == proposallist[i]){
                 proposallist[i] = proposallist[proposallist.length-1];
                 delete proposallist[proposallist.length-1];
+                proposallist.length--;
             }
         }
     }

@@ -2,116 +2,8 @@ pragma solidity ^0.5.1;
 import "./nodes.sol";
 import "./safemath.sol";
 
-contract VoteInterface {
-    /**
-     * 投票  
-     */
-    function vote(
-        address payable voterAddr, 
-        address payable candidateAddr, 
-        uint num
-    ) public returns(bool);
 
-    /**
-     * 用于批量投票
-     */
-    function batchVote(
-        address payable voterAddr, 
-        address payable[] memory candidateAddrs, 
-        uint[] memory nums
-    ) public returns(bool);
-    
-    /*
-    *设置持币地址
-    */
-    function setHolderAddr(
-        address payable _coinBase,
-        address payable _holderAddr
-    ) public returns(bool);
-    
-    /**
-     * 撤回对某个候选人的投票
-     */
-    function cancelVoteForCandidate(
-        address payable voterAddr, 
-        address payable candidateAddr, 
-        uint num
-    ) public returns(bool);
-
-    function refreshVoteForAll() public;
-}
-contract FetchVoteInterface {
-
-    /**
-     * 获取所有投票人的详细信息
-     */
-    function fetchAllVoters() public view returns (
-        address payable[] memory, 
-        uint[] memory
-    );
-
-    /**
-     * 获取所有投票人的投票情况
-     */
-    function fetchVoteInfoForVoter(
-        address voterAddr
-    ) public view returns (
-        address[] memory, 
-        uint[] memory
-    );
-
-    /**
-     * 获取某个候选人的总得票数
-     */
-    function fetchVoteNumForCandidate(
-        address payable candidateAddr
-    ) public view returns (uint);
-
-    /**
-     * 获取某个投票人已投票数
-     */
-    function fetchVoteNumForVoter(
-        address payable voterAddr
-    ) public view returns (uint);
-
-    /**
-     * 获取某个候选人被投票详细情况
-     */
-    function fetchVoteInfoForCandidate(
-        address candidateAddr
-    ) public view returns (
-        address[] memory, 
-        uint[] memory
-    );
-    /**
-     * 获取某个投票人对某个候选人投票数量
-     */
-	function fetchVoteNumForVoterToCandidate(
-        address payable voterAddr,
-        address payable candidateAddr
-    ) public view returns (uint);
-    /**
-     * 获取所有候选人的得票情况
-     */
-    function fetchAllVoteResult() public view returns (
-        address payable[] memory,
-        uint[] memory
-    );
-
-    function getHolderAddr(
-        address  _coinBase
-    )  public view returns (
-        address 
-    );
-
-
-    function fetchAllHolderAddrs() public view returns(
-        address[] memory,
-        address[] memory);
-
-}
-
-contract NodeBallot is Ownable,VoteInterface,FetchVoteInterface {
+contract HpbVote is Ownable {
     using SafeMath for uint256;
 
     HpbNodes boenodes;
@@ -254,7 +146,7 @@ contract NodeBallot is Ownable,VoteInterface,FetchVoteInterface {
     function dovote(
         address payable boeaddr,
         uint num
-    )  public {
+    )  internal {
         require(num >= minLimit,"num too low");
         require(boenodes.isLockNode(boeaddr),"unlock node");
         if (voterIndexMap[msg.sender].coinbase == address(0)){
@@ -286,7 +178,7 @@ contract NodeBallot is Ownable,VoteInterface,FetchVoteInterface {
     /**
      * 用于批量投票 
      */
-    function  batchVote(
+    function  batchvote(
         address payable[] memory boeaddrs,
         uint[] memory nums
     )  public {
@@ -303,7 +195,7 @@ contract NodeBallot is Ownable,VoteInterface,FetchVoteInterface {
         docancelVote(msg.sender);
     }
     
-    function docancelVote(address voteraddr) public{
+    function docancelVote(address voteraddr) internal{
         VoterIndex memory newindex = voterIndexMap[voteraddr];
         require(newindex.coinbase == voteraddr);
         uint i = newindex.index;
@@ -437,13 +329,13 @@ contract NodeBallot is Ownable,VoteInterface,FetchVoteInterface {
         return true;
     }
     //合约拥有者提取合约余额的一部分
-    function withdraw(
-        uint _value
-    ) onlyOwner payable public returns(bool) {
-        require(address(this).balance >= _value);
-        owner.transfer(_value);
-        return true;
-    }
+    // function withdraw(
+    //     uint _value
+    // ) onlyOwner payable public returns(bool) {
+    //     require(address(this).balance >= _value);
+    //     owner.transfer(_value);
+    //     return true;
+    // }
     
     event SetHolderAddr(
         address payable indexed coinBase,

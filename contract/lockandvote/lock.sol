@@ -2,7 +2,7 @@ pragma solidity ^0.5.1;
 import "./nodes.sol";
 import "./safemath.sol";
 
-contract HpbNodeLockContract is Ownable{
+contract HpbLock is Ownable{
     using SafeMath for uint256;
     uint public lockNum=30000 ether;//默认每个账户只能锁定3万
     mapping(address=>uint) public lockBal;//保存质押金额
@@ -86,15 +86,4 @@ contract HpbNodeLockContract is Ownable{
         return true;
     }
     
-    
-}
-contract HpbNodeLockContractFactory{
-  event NewHpbNodeLockContract(address indexed addr);
-
-  function createHpbNodeLockContract() public returns(address){
-    HpbNodeLockContract hpbNodeLockContract = new HpbNodeLockContract();
-    require(hpbNodeLockContract.transferOwnership(msg.sender));
-    emit NewHpbNodeLockContract(address(hpbNodeLockContract));
-    return address(hpbNodeLockContract);
-  }
 }

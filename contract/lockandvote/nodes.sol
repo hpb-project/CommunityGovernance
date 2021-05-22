@@ -38,13 +38,13 @@ contract HpbNodes is Ownable{
         return true;
     }
 
-    function withdraw(
-        uint _value
-    ) onlyOwner payable public returns(bool) {
-        require(address(this).balance >= _value);
-        owner.transfer(_value);
-        return true;
-    }
+    // function withdraw(
+    //     uint _value
+    // ) onlyOwner payable public returns(bool) {
+    //     require(address(this).balance >= _value);
+    //     owner.transfer(_value);
+    //     return true;
+    // }
     struct BoeNode{
         address payable coinbase;
         bytes32 cid1;
@@ -76,7 +76,7 @@ contract HpbNodes is Ownable{
         bytes32 cid2,
         bytes32 hid
     ) onlyAdmin public returns(bool){
-        require(BoeNodesIndexMap[coinbase].coinbase != address(0));
+        require(BoeNodesIndexMap[coinbase].coinbase == address(0));
         BoeNode memory boe;
         boe.coinbase = coinbase;
         boe.cid1 = cid1;
@@ -89,7 +89,7 @@ contract HpbNodes is Ownable{
         return true;
     }
     
-    function addHpbNodeBatch(
+    function addBoeNodeBatch(
         address payable[] memory coinbases,
         bytes32[] memory cid1s,
         bytes32[] memory cid2s,
@@ -144,7 +144,7 @@ contract HpbNodes is Ownable{
         BoeNodesIndexMap[BoeNodes[BoeNodes.length-1].coinbase].index = BoeNodesIndexMap[coinbase].index; 
         delete BoeNodes[BoeNodes.length-1];
         delete(BoeNodesIndexMap[coinbase]);
-
+        BoeNodes.length--;
         emit DeleteBoeNode(coinbase);
         return true;
     }
@@ -241,6 +241,10 @@ contract HpbNodes is Ownable{
         return true;
     }
     
+    function getLockContract() public view returns(address){
+        return LockContractAddr;
+    }
+    
     function stake(address nodeAddr) public{
         //只能是质押合约来更新
         require(msg.sender == LockContractAddr);
@@ -260,5 +264,6 @@ contract HpbNodes is Ownable{
         delete LockNodes[LockNodes.length-1];
         LockNodesIndexMap[LockNodes[index]].index = index;
         delete LockNodesIndexMap[nodeAddr];
+        LockNodes.length--;
     }
 }
