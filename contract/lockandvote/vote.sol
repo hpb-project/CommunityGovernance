@@ -16,15 +16,15 @@ contract HpbVote is Ownable {
     mapping (address => bool) holderused;
 
     function setHolderAddr(
-        address payable _holderAddr
-    )  public returns(bool) {
-        require(!holderused[_holderAddr]);
-        address beforeholder = holderMap[msg.sender];
-        holderMap[msg.sender]=_holderAddr;
-        holderused[_holderAddr] = true;
+        address payable boeaddr
+        address payable holderAddr
+    )  onlyAdmin public {
+        require(!holderused[holderAddr]);
+        address beforeholder = holderMap[boeaddr];
+        holderMap[boeaddr]=holderAddr;
+        holderused[holderAddr] = true;
         delete holderused[beforeholder];
-		emit SetHolderAddr(msg.sender,_holderAddr);
-		return true;
+		emit SetHolderAddr(boeaddr,holderAddr);
     }
 
     function fetchAllHolderAddrs() public view returns(address[] memory,
@@ -38,14 +38,14 @@ contract HpbVote is Ownable {
     }
 
     function getHolderAddr(
-        address  _coinBase
+        address  boeaddr
     )  public view returns (
         address 
     ){
-        if(holderMap[_coinBase]==address(0)){
-            return _coinBase;
+        if(holderMap[boeaddr]==address(0)){
+            return boeaddr;
         }
-        return holderMap[_coinBase];
+        return holderMap[boeaddr];
     }
 
     uint _gasLeftLimit=500000;//对于过于复杂操作，无法一步完成，那么必须分步进行

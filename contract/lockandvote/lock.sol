@@ -44,7 +44,7 @@ contract HpbLock is Ownable{
     }
     
     function fetchLockInfoByNodeAddr(address nodeAddr) public view returns (
-        address,//锁仓地址列
+        address,
         uint
     ) {
         return (nodeToLockAddr[nodeAddr],lockBal[nodeAddr]);
