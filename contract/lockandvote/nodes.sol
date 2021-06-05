@@ -266,4 +266,52 @@ contract HpbNodes is Ownable{
         delete LockNodesIndexMap[nodeAddr];
         LockNodes.length--;
     }
+    
+    mapping (address => address) boetoholder;//boe节点地址=>持币地址
+    mapping (address => address) holdertoboe;//持币地址=》boe地址
+    //持币地址的设置需要双向确认
+    function setHolderAddr(address holderAddr) public { //Boe地址调用此函数设置持币地址
+        require(isBoeNode(msg.sender)); //只有boe地址能调用此函数
+        require(holdertoboe[holderAddr] == address(0));//需要holderAddr未使用
+        address beforeholder = boetoholder[msg.sender]; //删除旧的持币地址
+        boetoholder[msg.sender]=holderAddr;
+        holdertoboe[holderAddr] = msg.sender;
+        delete holdertoboe[beforeholder];
+		emit SetHolderAddr(msg.sender,holderAddr);
+    }
+    
+    //允许持币地址重复设置，重复设置时，取消前次的设置，
+    //避免因误操作先设置了其他人的boe地址之后无法设置自己的boe地址
+    function setHolderBoeAddr(address boeaddr) public{ //持币地址调用此函数，设置要支持的boe地址
+        require(isBoeNode(boeaddr));
+        //require(holdertoboe[msg.sender] == address(0));//取消此限制，避免误操作后无法设置的问题
+        require(boetoholder[boeaddr] == msg.sender);
+        holdertoboe[msg.sender] = boeaddr;
+    }
+
+    function fetchAllHolderAddrs() public view returns(address[] memory,
+        address[] memory){
+            address[] memory nodes = getAllBoesAddrs();
+            address[] memory holders = new address[](nodes.length);
+            for(uint i = 0; i < nodes.length; i++){
+                holders[i] = getHolderAddr(nodes[i]);
+            }
+            return (nodes,holders);
+    }
+
+    function getHolderAddr(
+        address  boeaddr
+    )  public view returns (
+        address 
+    ){
+        if (holdertoboe[boetoholder[boeaddr]] == boeaddr){
+            return boetoholder[boeaddr];
+        }
+        return boeaddr;
+    }
+    
+    event SetHolderAddr(
+        address indexed coinBase,
+        address indexed holderAddr
+    );
 }

@@ -23,7 +23,7 @@ contract HpbLock is Ownable{
         lockBal[nodeAddr]=lockNum;//记录下锁仓金额
         nodeToLockAddr[nodeAddr]=msg.sender;//记录节点地址对应的质押地址
         boenodes.stake(nodeAddr);
-        if(msg.value>=lockNum){//如果锁仓超过30000个HPB，多余的退回
+        if(msg.value > lockNum){//如果锁仓超过30000个HPB，多余的退回
             msg.sender.transfer(msg.value.sub(lockNum));
         }
         emit LockBal(nodeAddr,msg.sender,lockNum);

@@ -11,44 +11,8 @@ contract HpbVote is Ownable {
     function setNodeContract(address payable addr) onlyAdmin public {
         boenodes = HpbNodes(addr);
     }
- 
-    mapping (address  => address payable) holderMap;//高性能节点地址=>持币地址
-    mapping (address => bool) holderused;
 
-    function setHolderAddr(
-        address payable boeaddr
-        address payable holderAddr
-    )  onlyAdmin public {
-        require(!holderused[holderAddr]);
-        address beforeholder = holderMap[boeaddr];
-        holderMap[boeaddr]=holderAddr;
-        holderused[holderAddr] = true;
-        delete holderused[beforeholder];
-		emit SetHolderAddr(boeaddr,holderAddr);
-    }
-
-    function fetchAllHolderAddrs() public view returns(address[] memory,
-        address[] memory){
-            address[] memory nodes = boenodes.getAllBoesAddrs();
-            address[] memory holders = new address[](nodes.length);
-            for(uint i = 0; i < nodes.length; i++){
-                holders[i] = getHolderAddr(nodes[i]);
-            }
-            return (nodes,holders);
-    }
-
-    function getHolderAddr(
-        address  boeaddr
-    )  public view returns (
-        address 
-    ){
-        if(holderMap[boeaddr]==address(0)){
-            return boeaddr;
-        }
-        return holderMap[boeaddr];
-    }
-
-    uint _gasLeftLimit=500000;//对于过于复杂操作，无法一步完成，那么必须分步进行
+    uint _gasLeftLimit=1000000;//对于过于复杂操作，无法一步完成，那么必须分步进行
     
     uint public minLimit=1 ether;//最小投票数量限额：1HPB,可外部设置
     
@@ -336,11 +300,6 @@ contract HpbVote is Ownable {
     //     owner.transfer(_value);
     //     return true;
     // }
-    
-    event SetHolderAddr(
-        address payable indexed coinBase,
-        address payable indexed holderAddr
-    );
     
     event ApprovalFor(
         bool indexed approved,
