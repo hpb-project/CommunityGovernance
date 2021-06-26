@@ -4,14 +4,20 @@ import "./safemath.sol";
 
 contract HpbLock is Ownable{
     using SafeMath for uint256;
-    uint public lockNum=30000 ether;//默认每个账户只能锁定3万
+    uint lockNum=30000 ether;//默认每个账户只能锁定3万
     mapping(address=>uint) public lockBal;//保存质押金额
     mapping(address=>address payable) public nodeToLockAddr;//节点地址=》质押地址
  
     HpbNodes boenodes;
+    address payable nodeaddr;
     
     function setNodeContract(address payable addr) onlyAdmin public {
         boenodes = HpbNodes(addr);
+        nodeaddr = addr;
+    }
+
+    function getNodeContract() public view returns(address){
+        return nodeaddr;
     }
     /**
 	 ** 质押锁仓，动态选举可随时进行质押

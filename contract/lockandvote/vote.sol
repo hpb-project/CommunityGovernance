@@ -7,9 +7,15 @@ contract HpbVote is Ownable {
     using SafeMath for uint256;
 
     HpbNodes boenodes;
+    address payable nodeaddr;
 
     function setNodeContract(address payable addr) onlyAdmin public {
         boenodes = HpbNodes(addr);
+        nodeaddr = addr;
+    }
+
+    function getNodeContract() public view returns(address){
+        return nodeaddr;
     }
 
     uint _gasLeftLimit=1000000;//对于过于复杂操作，无法一步完成，那么必须分步进行
@@ -130,6 +136,7 @@ contract HpbVote is Ownable {
             voterArray[voterIndexMap[msg.sender].index].voteNumber = num.add(voterArray[voterIndexMap[msg.sender].index].voteNumber);
             if (voterArray[voterIndexMap[msg.sender].index].vote[boeaddr].coinbase == address(0)){//之前未给boeddr投过票
                 voterArray[voterIndexMap[msg.sender].index].vote[boeaddr].index = voterArray[voterIndexMap[msg.sender].index].boes.length;
+                voterArray[voterIndexMap[msg.sender].index].vote[boeaddr].coinbase = boeaddr;
                 voterArray[voterIndexMap[msg.sender].index].boes.push(boeaddr);
             }
             voterArray[voterIndexMap[msg.sender].index].vote[boeaddr].voteNumber = num.add(voterArray[voterIndexMap[msg.sender].index].vote[boeaddr].voteNumber);
