@@ -10,6 +10,11 @@ contract Proxy is Ownable{
     HpbLock hpblock;
     HpbVote hpbvote;
 
+    constructor () payable public {
+        owner = msg.sender;
+        addAdmin(owner);
+    }
+
     function setnodecontract(address payable nodeaddr) onlyAdmin public{
         node = nodeaddr;
         hpbnode = HpbNodes(nodeaddr);
