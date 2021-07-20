@@ -1,18 +1,27 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 
-contract govermentSet {
+contract blockSet {
     struct BlockNumber {
-        uint256 number;
+        string  keywords;
+        uint256 blockNumber;
+        uint256 threshold;
         bool valid;
     }
 
-    address private owner;
-    // key => value  (key不能重复)
-    mapping(string => BlockNumber) map;  // 字典（mapping）类型   (映射类型)
+    address private owner; // owner is always an admin.
+    uint256 threshold;
+    mapping(string => BlockNumber) blockmap; // keywords ==> blocknumber
+    address[]  admins;
+    string[]   proposalList;
+    mapping(address => bool) mapAdmin;
+    mapping(string => address[]) votes;
 
     // event for EVM logging
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
+    event AddAdmin(address indexed user, address indexed newAdmin);
+    event DelAdmin(address indexed user, address indexed admin);
+    event PassedThreshold(string indexed keywords);
 
     // modifier to check if caller is owner
     modifier isOwner() {
@@ -24,12 +33,17 @@ contract govermentSet {
         require(msg.sender == owner, "Caller is not owner");
         _;
     }
+    modifier isAdmin() {
+        require(mapAdmin[msg.sender] || (msg.sender == owner), "Caller is not owner and admin");
+        _;
+    }
 
     /**
      * @dev Set contract deployer as owner
      */
     constructor() {
         owner = msg.sender; // 'msg.sender' is sender of current call, contract deployer for a constructor
+        threshold = 1;
         emit OwnerSet(address(0), owner);
     }
 
@@ -46,14 +60,88 @@ contract govermentSet {
         return owner;
     }
 
-    function setValue(string memory key, uint256 value) public isOwner {
-        map[key]  = BlockNumber(value, true);
+    function addAdmin(address admin) public isOwner {
+        if (!mapAdmin[admin]){
+            mapAdmin[admin] = true;
+            admins.push(admin);
+            emit AddAdmin(msg.sender, admin);
+        }
+    }
+
+    function getAdmins() public view returns (address[] memory){
+        return admins;
+    }
+
+    function deleteAdmin(address admin) public isOwner {
+        if (mapAdmin[admin]){
+            for (uint256 i = 0; i< admins.length;i++){
+                if (admins[i] == admin){
+                    admins[i] = admins[admins.length-1];
+                    delete admins[admins.length-1];
+                    delete mapAdmin[admin];
+                    emit DelAdmin(msg.sender, admin);
+                }
+            }
+            if (threshold > admins.length){
+                threshold = admins.length;
+                if (threshold == 0) {
+                    threshold = 1; // owner is always an admin.
+                }
+            }
+        }
+    }
+
+    function setThreshold(uint256 newThreshold) public isOwner {
+        require(newThreshold > 0,"threshold == 0");
+        if (newThreshold > admins.length){
+            threshold = admins.length;
+        }else{
+            threshold = newThreshold;
+        }
+        if (threshold == 0) {
+            threshold = 1;
+        }
     }
 
     function getValue(string memory key) external view returns (uint256) {
-        require(map[key].valid);
-        return map[key].number;
+        require(blockmap[key].valid);
+        return blockmap[key].blockNumber;
     }
 
+    function addProposal(string memory key,uint256 number) public isAdmin {
+        require(blockmap[key].threshold == 0,"Not new Proposal");
+
+        BlockNumber memory newproposal;
+        newproposal.keywords = key;
+        newproposal.threshold = threshold;
+        newproposal.blockNumber = number;
+        votes[key].push(msg.sender);
+        if (votes[key].length >= newproposal.threshold) {
+            newproposal.valid = true;
+        } else {
+            newproposal.valid = false;
+        }
+
+        blockmap[key] = newproposal;
+    }
+
+    function resetProposal(string memory key,uint256 number) public isAdmin {
+        delete blockmap[key];
+        delete votes[key];
+        addProposal(key, number);
+    }
+
+    function voteProposal(string memory key) public isAdmin {
+        require(blockmap[key].threshold > 0, "Not found proposal");
+        for (uint256 i = 0; i < votes[key].length; i++){
+            if (votes[key][i] == msg.sender){
+                return;
+            }
+        }
+        votes[key].push(msg.sender);
+        if (votes[key].length >= blockmap[key].threshold){
+            blockmap[key].valid = true;
+        }
+    }
 
 }
