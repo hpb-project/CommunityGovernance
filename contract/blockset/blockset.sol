@@ -1,4 +1,4 @@
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity ^0.5.1;
 
 
 contract blockSet {
@@ -79,7 +79,9 @@ contract blockSet {
                     admins[i] = admins[admins.length-1];
                     delete admins[admins.length-1];
                     delete mapAdmin[admin];
+                    admins.length--;
                     emit DelAdmin(msg.sender, admin);
+                    break;
                 }
             }
             if (threshold > admins.length){
