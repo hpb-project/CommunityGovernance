@@ -1,19 +1,193 @@
 [
     {
+        "constant": false,
         "inputs": [
             {
-                "internalType": "address",
+                "name": "admin",
+                "type": "address"
+            }
+        ],
+        "name": "deleteAdmin",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getAdmins",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string"
+            }
+        ],
+        "name": "getProposalThreshold",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string"
+            }
+        ],
+        "name": "voteProposal",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "admin",
+                "type": "address"
+            }
+        ],
+        "name": "addAdmin",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getOwner",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string"
+            },
+            {
+                "name": "number",
+                "type": "uint256"
+            }
+        ],
+        "name": "resetProposal",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string"
+            }
+        ],
+        "name": "getValue",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "newThreshold",
+                "type": "uint256"
+            }
+        ],
+        "name": "setThreshold",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
                 "name": "newOwner",
                 "type": "address"
             }
         ],
         "name": "changeOwner",
         "outputs": [],
+        "payable": false,
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "key",
+                "type": "string"
+            },
+            {
+                "name": "number",
+                "type": "uint256"
+            }
+        ],
+        "name": "addProposal",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
         "inputs": [],
+        "name": "getThreshold",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "payable": false,
         "stateMutability": "nonpayable",
         "type": "constructor"
     },
@@ -22,13 +196,11 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "address",
                 "name": "oldOwner",
                 "type": "address"
             },
             {
                 "indexed": true,
-                "internalType": "address",
                 "name": "newOwner",
                 "type": "address"
             }
@@ -37,53 +209,49 @@
         "type": "event"
     },
     {
+        "anonymous": false,
         "inputs": [
             {
-                "internalType": "string",
-                "name": "key",
-                "type": "string"
+                "indexed": true,
+                "name": "user",
+                "type": "address"
             },
             {
-                "internalType": "uint256",
-                "name": "value",
-                "type": "uint256"
-            }
-        ],
-        "name": "setValue",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getOwner",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
+                "indexed": true,
+                "name": "newAdmin",
                 "type": "address"
             }
         ],
-        "stateMutability": "view",
-        "type": "function"
+        "name": "AddAdmin",
+        "type": "event"
     },
     {
+        "anonymous": false,
         "inputs": [
             {
-                "internalType": "string",
-                "name": "key",
+                "indexed": true,
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "name": "admin",
+                "type": "address"
+            }
+        ],
+        "name": "DelAdmin",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "name": "keywords",
                 "type": "string"
             }
         ],
-        "name": "getValue",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
+        "name": "PassedThreshold",
+        "type": "event"
     }
 ]

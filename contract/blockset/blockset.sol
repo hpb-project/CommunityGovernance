@@ -41,7 +41,7 @@ contract blockSet {
     /**
      * @dev Set contract deployer as owner
      */
-    constructor() {
+    constructor() public {
         owner = msg.sender; // 'msg.sender' is sender of current call, contract deployer for a constructor
         threshold = 1;
         emit OwnerSet(address(0), owner);
@@ -70,6 +70,15 @@ contract blockSet {
 
     function getAdmins() public view returns (address[] memory){
         return admins;
+    }
+
+    function getThreshold() public view returns (uint256){
+        return threshold;
+    }
+
+    function getProposalThreshold(string memory key) public view returns (uint256) {
+        require(blockmap[key].threshold > 0, "proposol not exist");
+        return blockmap[key].threshold;
     }
 
     function deleteAdmin(address admin) public isOwner {
@@ -105,7 +114,7 @@ contract blockSet {
         }
     }
 
-    function getValue(string memory key) external view returns (uint256) {
+    function getValue(string calldata key) external view returns (uint256) {
         require(blockmap[key].valid);
         return blockmap[key].blockNumber;
     }
