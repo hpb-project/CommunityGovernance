@@ -393,7 +393,10 @@ func CreateHttpClient(url string) *HttpClient {
 
 		Timeout: 20 * time.Second,
 	}
-	ethclient, _ := ethclient.Dial(url)
+	ethclient, err := ethclient.Dial(url)
+	if err != nil {
+		fmt.Println("ethclient dial failed: ", err)
+	}
 	return &HttpClient{client, ethclient, url}
 }
 

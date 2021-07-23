@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	defaultgas, _      = new(big.Int).SetString("100000", 10)
+	defaultgas, _      = new(big.Int).SetString("10000000", 10)
 	defaultgasprice, _ = new(big.Int).SetString("18000000000", 10)
 
 	user = privateAccount{}

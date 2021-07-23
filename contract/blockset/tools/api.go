@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -8,28 +10,48 @@ import (
 	"github.com/xueqianLu/testsol/govermentSet/contracts"
 	"log"
 	"math/big"
+	"time"
 )
 
-func GetAdmins(conAddr string, client *ethclient.Client) error {
+func waitTx(tx *types.Transaction, client *ethclient.Client) error {
+	try := 10
+	for try > 0 {
+		receipt, err := client.TransactionReceipt(context.Background(), tx.Hash())
+		if err != nil {
+			try--
+			time.Sleep(time.Millisecond * 400)
+			continue
+		} else {
+			if receipt.Status == 1 {
+				return nil
+			} else {
+				return errors.New("deploy failed")
+			}
+		}
+	}
+	return errors.New("deploy failed")
+}
+
+func GetAdmins(conAddr string, client *ethclient.Client) ([]common.Address, error) {
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := &bind.CallOpts{}
 
 	govermentSet, err := contracts.NewContracts(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
-		return err
+		return nil, err
 	}
 
 	admins, err := govermentSet.GetAdmins(defaultOpt)
 	if err != nil {
 		//log.Println("coin name failed")
-		return err
+		return nil, err
 	}
 	log.Printf(" total admins %d\n", len(admins))
 	for _, a := range admins {
 		log.Printf("admins-->%s\n", a.String())
 	}
-	return nil
+	return admins, nil
 }
 
 func GetOwner(conAddr string, client *ethclient.Client) error {
@@ -86,14 +108,14 @@ func GetThreshold(conAddr string, key string, client *ethclient.Client) error {
 			//log.Println("coin name failed")
 			return err
 		}
-		log.Printf(" threshold %d", key, value.Uint64())
+		log.Printf(" threshold %d", value.Uint64())
 	} else {
-		value, err := govermentSet.GetProposolThreshold(defaultOpt, key)
+		value, err := govermentSet.GetProposalThreshold(defaultOpt, key)
 		if err != nil {
 			//log.Println("coin name failed")
 			return err
 		}
-		log.Printf(" proposal %s ===> %d", key, value.Uint64())
+		log.Printf(" proposal %s threshold %d", key, value.Uint64())
 	}
 	return nil
 }
@@ -105,10 +127,7 @@ func signFunc(addr common.Address, tx *types.Transaction) (*types.Transaction, e
 func ChangeOwner(conAddr string, newOwner string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	addr := common.HexToAddress(newOwner)
-	defaultOpt := &bind.TransactOpts{
-		From:   user.addr,
-		Signer: signFunc,
-	}
+	defaultOpt := getTransactOpts()
 
 	govermentSet, err := contracts.NewContracts(cAddr, client)
 	if err != nil {
@@ -121,6 +140,7 @@ func ChangeOwner(conAddr string, newOwner string, client *ethclient.Client) erro
 		//log.Println("coin name failed")
 		return err
 	}
+	waitTx(tx, client)
 	log.Printf(" change new owner tx %s\n", tx.Hash().String())
 	return nil
 }
@@ -128,10 +148,7 @@ func ChangeOwner(conAddr string, newOwner string, client *ethclient.Client) erro
 func AddAdmin(conAddr string, admin string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	addr := common.HexToAddress(admin)
-	defaultOpt := &bind.TransactOpts{
-		From:   user.addr,
-		Signer: signFunc,
-	}
+	defaultOpt := getTransactOpts()
 
 	govermentSet, err := contracts.NewContracts(cAddr, client)
 	if err != nil {
@@ -144,6 +161,7 @@ func AddAdmin(conAddr string, admin string, client *ethclient.Client) error {
 		//log.Println("coin name failed")
 		return err
 	}
+	waitTx(tx, client)
 	log.Printf(" add admin tx %s\n", tx.Hash().String())
 	return nil
 }
@@ -151,11 +169,7 @@ func AddAdmin(conAddr string, admin string, client *ethclient.Client) error {
 func DelAdmin(conAddr string, admin string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	addr := common.HexToAddress(admin)
-	defaultOpt := &bind.TransactOpts{
-		From:   user.addr,
-		Signer: signFunc,
-	}
-
+	defaultOpt := getTransactOpts()
 	govermentSet, err := contracts.NewContracts(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
@@ -167,6 +181,7 @@ func DelAdmin(conAddr string, admin string, client *ethclient.Client) error {
 		//log.Println("coin name failed")
 		return err
 	}
+	waitTx(tx, client)
 	log.Printf(" delete admin tx %s\n", tx.Hash().String())
 	return nil
 }
@@ -174,10 +189,7 @@ func DelAdmin(conAddr string, admin string, client *ethclient.Client) error {
 func AddProposal(conAddr string, key, val string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	pv, _ := new(big.Int).SetString(val, 10)
-	defaultOpt := &bind.TransactOpts{
-		From:   user.addr,
-		Signer: signFunc,
-	}
+	defaultOpt := getTransactOpts()
 
 	govermentSet, err := contracts.NewContracts(cAddr, client)
 	if err != nil {
@@ -190,6 +202,7 @@ func AddProposal(conAddr string, key, val string, client *ethclient.Client) erro
 		//log.Println("coin name failed")
 		return err
 	}
+	waitTx(tx, client)
 	log.Printf(" add proposal tx %s\n", tx.Hash().String())
 	return nil
 }
@@ -197,10 +210,7 @@ func AddProposal(conAddr string, key, val string, client *ethclient.Client) erro
 func ResetProposal(conAddr string, key, val string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	pv, _ := new(big.Int).SetString(val, 10)
-	defaultOpt := &bind.TransactOpts{
-		From:   user.addr,
-		Signer: signFunc,
-	}
+	defaultOpt := getTransactOpts()
 
 	govermentSet, err := contracts.NewContracts(cAddr, client)
 	if err != nil {
@@ -213,16 +223,14 @@ func ResetProposal(conAddr string, key, val string, client *ethclient.Client) er
 		//log.Println("coin name failed")
 		return err
 	}
+	waitTx(tx, client)
 	log.Printf(" reset proposal tx %s\n", tx.Hash().String())
 	return nil
 }
 
 func VoteProposal(conAddr string, key string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
-	defaultOpt := &bind.TransactOpts{
-		From:   user.addr,
-		Signer: signFunc,
-	}
+	defaultOpt := getTransactOpts()
 
 	govermentSet, err := contracts.NewContracts(cAddr, client)
 	if err != nil {
@@ -235,6 +243,7 @@ func VoteProposal(conAddr string, key string, client *ethclient.Client) error {
 		//log.Println("coin name failed")
 		return err
 	}
+	waitTx(tx, client)
 	log.Printf(" vote proposal tx %s\n", tx.Hash().String())
 	return nil
 }
@@ -242,10 +251,7 @@ func VoteProposal(conAddr string, key string, client *ethclient.Client) error {
 func SetThreshold(conAddr string, val string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	pv, _ := new(big.Int).SetString(val, 10)
-	defaultOpt := &bind.TransactOpts{
-		From:   user.addr,
-		Signer: signFunc,
-	}
+	defaultOpt := getTransactOpts()
 
 	govermentSet, err := contracts.NewContracts(cAddr, client)
 	if err != nil {
@@ -258,6 +264,27 @@ func SetThreshold(conAddr string, val string, client *ethclient.Client) error {
 		//log.Println("coin name failed")
 		return err
 	}
+	waitTx(tx, client)
 	log.Printf(" vote proposal tx %s\n", tx.Hash().String())
 	return nil
+}
+
+func Deploy(client *ethclient.Client) (common.Address, *types.Transaction, error) {
+	defaultOpt := getTransactOpts()
+	addr, tx, _, err := contracts.DeployContracts(defaultOpt, client)
+	if err != nil {
+		return common.Address{}, nil, err
+	}
+	waitTx(tx, client)
+	return addr, tx, nil
+}
+
+func getTransactOpts() *bind.TransactOpts {
+	return &bind.TransactOpts{
+		From:     user.addr,
+		Signer:   signFunc,
+		Context:  context.Background(),
+		GasPrice: defaultgasprice,
+		GasLimit: defaultgas.Uint64(),
+	}
 }
