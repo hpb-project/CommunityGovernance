@@ -16,7 +16,7 @@
    
 **./delAdmin.sh 0xaf2f041e5c4937a1bc6a1f085e087620b59b9c21**
 
-#### 2.3. reset.sh    : 合约owner有权操作,重置key对应的块号
+#### 2.3. reset.sh    : 重置key对应的块号
    
 **./reset.sh testkey 100**
 
