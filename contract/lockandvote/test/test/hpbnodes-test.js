@@ -131,4 +131,88 @@ describe("HpbNodes Holders tests", function () {
 
   });
 
+  it("get all hpbnodes and boenodes without stake", async function () {
+    const HpbNodes = await hre.ethers.getContractFactory("HpbNodes");
+    const hpbNodes = await HpbNodes.deploy();
+    await hpbNodes.deployed();
+
+    const HpbLocks = await hre.ethers.getContractFactory("HpbLock");
+    const hpbLocks = await HpbLocks.deploy();
+    await hpbLocks.deployed();
+
+    await hpbLocks.setNodeContract(hpbNodes.address);
+    expect(await hpbLocks.getNodeContract()).to.equal(hpbNodes.address);
+
+    await hpbNodes.setLockContract(hpbLocks.address);
+    expect(await hpbNodes.getLockContract()).to.equal(hpbLocks.address);
+
+    const accounts = await hre.ethers.getSigners();
+    // add accounts 0,1,2 to boeNodes.
+    await addOneBoe(hpbNodes, accounts[0].address);
+    await addOneBoe(hpbNodes, accounts[1].address);
+    await addOneBoe(hpbNodes, accounts[2].address);
+
+    // getAllBoesAddrs length is 3.
+    let boeAddresses = await hpbNodes.getAllBoesAddrs();
+    expect(boeAddresses.length).equal(3);
+    // getAllBoes      length is 3.
+    let [coinbases,cid1s,cid2s,hids] = await hpbNodes.getAllBoes();
+    expect(coinbases.length).equal(3);
+    expect(cid1s.length).equal(3);
+    expect(cid2s.length).equal(3);
+    expect(hids.length).equal(3);
+    // getAllHpbNodes  length is 0.
+    let [hpb_coinbases,hpb_cid1s,hpb_cid2s,hpb_hids] = await hpbNodes.getAllHpbNodes();
+    expect(hpb_coinbases.length).equal(0);
+    expect(hpb_cid1s.length).equal(0);
+    expect(hpb_cid2s.length).equal(0);
+    expect(hpb_hids.length).equal(0);
+    // getAlllockNode  length is 0.
+    let hpbnodes = await hpbNodes.getAlllockNode();
+    expect(hpbnodes.length).equal(0);
+  });
+
+  it("get all hpbnodes and boenodes with one stake", async function () {
+    const HpbNodes = await hre.ethers.getContractFactory("HpbNodes");
+    const hpbNodes = await HpbNodes.deploy();
+    await hpbNodes.deployed();
+
+    const HpbLocks = await hre.ethers.getContractFactory("HpbLock");
+    const hpbLocks = await HpbLocks.deploy();
+    await hpbLocks.deployed();
+
+    await hpbLocks.setNodeContract(hpbNodes.address);
+    expect(await hpbLocks.getNodeContract()).to.equal(hpbNodes.address);
+
+    await hpbNodes.setLockContract(hpbLocks.address);
+    expect(await hpbNodes.getLockContract()).to.equal(hpbLocks.address);
+
+    const accounts = await hre.ethers.getSigners();
+    // add accounts 0,1,2 to boeNodes.
+    await addOneBoe(hpbNodes, accounts[0].address);
+    await addOneBoe(hpbNodes, accounts[1].address);
+    await addOneBoe(hpbNodes, accounts[2].address);
+
+    // stake account[1].
+    await hpbLocks.connect(accounts[1]).stake(accounts[1].address, { value: ethers.utils.parseEther('30000') });
+
+    // getAllBoesAddrs length is 3.
+    let boeAddresses = await hpbNodes.getAllBoesAddrs();
+    expect(boeAddresses.length).equal(3);
+    // getAllBoes      length is 3.
+    let [coinbases,cid1s,cid2s,hids] = await hpbNodes.getAllBoes();
+    expect(coinbases.length).equal(3);
+    expect(cid1s.length).equal(3);
+    expect(cid2s.length).equal(3);
+    expect(hids.length).equal(3);
+    // getAllHpbNodes  length is 1.
+    let [hpb_coinbases,hpb_cid1s,hpb_cid2s,hpb_hids] = await hpbNodes.getAllHpbNodes();
+    expect(hpb_coinbases.length).equal(1);
+    expect(hpb_cid1s.length).equal(1);
+    expect(hpb_cid2s.length).equal(1);
+    expect(hpb_hids.length).equal(1);
+    // getAlllockNode  length is 1.
+    let hpbnodes = await hpbNodes.getAlllockNode();
+    expect(hpbnodes.length).equal(1);
+  });
 });
