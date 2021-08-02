@@ -122,6 +122,8 @@ describe("HpbNodes Holders tests", function () {
     // verify boeaddr
     await hpbNodes.connect(holderaddr).setHolderBoeAddr(boeaddr.address);
 
+    expect(await hpbNodes.getHolderAddr(boeaddr.address)).to.equal(holderaddr.address);
+
     // check
     let [boes,holders] = await hpbNodes.fetchAllHolderAddrs();
     expect(boes[0]).to.equal(boeaddr.address);

@@ -251,10 +251,6 @@ contract HpbNodes is Ownable{
         require(LockNodesIndexMap[nodeAddr].coinbase == address(0));
         require(BoeNodesIndexMap[nodeAddr].coinbase != address(0));
         LockNodes.push(nodeAddr);
-        //NodeIndex memory nidx;
-        //nidx.coinbase = nodeAddr;
-        //nidx.index = LockNodes.length - 1;
-        //LockNodesIndexMap[nodeAddr] = nidx;
         LockNodesIndexMap[nodeAddr].coinbase = nodeAddr;
         LockNodesIndexMap[nodeAddr].index = LockNodes.length-1;
     }
