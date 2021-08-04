@@ -11,6 +11,16 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
+// Define mnemonic for accounts.
+let mnemonic = process.env.MNEMONIC;
+if (!mnemonic) {
+        // NOTE: this fallback is for development only!
+        // When using other networks, set the secret in .env.
+        // DO NOT commit or share your mnemonic with others!
+        mnemonic = 'test test test test test test test test test test test test';        
+}
+const accounts = { mnemonic };
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
@@ -21,7 +31,7 @@ module.exports = {
   networks: {
     hardhat: {
       accounts:{
-        accountsBalance:"80000000000000000000000"
+        accountsBalance:"800000000000000000000000"
       }
     }
   },
