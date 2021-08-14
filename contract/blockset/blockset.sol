@@ -170,6 +170,7 @@ contract BlockSet {
             if (!history[key].valid) {
                 proposalList.push(key);
             }
+            history[key] = blockmap[key];
         }
     }
 

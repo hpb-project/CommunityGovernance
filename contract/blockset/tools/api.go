@@ -91,6 +91,7 @@ func ProxyGetValue(conAddr string, key string, client *ethclient.Client) error {
 	log.Printf(" key %s ===> %d", key, value.Uint64())
 	return nil
 }
+
 func ProxyGetContract(conAddr string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := &bind.CallOpts{}
@@ -107,6 +108,27 @@ func ProxyGetContract(conAddr string, client *ethclient.Client) error {
 		return err
 	}
 	log.Printf(" current contract addr is %s", addr)
+	return nil
+}
+
+func ProxySetContract(paddr string, blocksetAddr string, client *ethclient.Client) error {
+	cAddr := common.HexToAddress(paddr)
+	addr := common.HexToAddress(blocksetAddr)
+	defaultOpt := getTransactOpts()
+
+	Proxy, err := proxy.NewProxy(cAddr, client)
+	if err != nil {
+		//log.Println("newErc20 failed")
+		return err
+	}
+
+	tx, err := Proxy.Setcontract(defaultOpt, addr)
+	if err != nil {
+		//log.Println("coin name failed")
+		return err
+	}
+	waitTx(tx, client)
+	log.Printf(" set contract tx %s\n", tx.Hash().String())
 	return nil
 }
 

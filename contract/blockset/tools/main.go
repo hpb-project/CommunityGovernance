@@ -47,6 +47,7 @@ func main() {
 	url := flag.String("u", "http://127.0.0.1:8545", "rpc url")
 	senderPrivKey := flag.String("priv", "", "Sender private key in hex")
 	proxyaddr := flag.String("proxy", "", "proxy contract address")
+	setaddr   := flag.String("sn", "", "set blockset contract")
 	addr := flag.String("addr", "", "contract address")
 	// admin
 	addAdmin := flag.String("addAdmin", "", "new admin address")
@@ -67,22 +68,6 @@ func main() {
 	var err error
 	client := NewHttpClient(*url)
 	chainId := client.ChainID()
-	if len(*proxyaddr) > 0 {
-		ProxyGetContract(*proxyaddr, client.eth)
-		if len(*get) > 0 {
-			err = ProxyGetValue(*proxyaddr, *get, client.eth)
-			if err != nil {
-				log.Fatal("err ", err)
-			}
-		}
-		return
-	}
-
-	if len(*addr) == 0 {
-		log.Fatal("no contract address")
-	}
-
-	SimpleInfo(*addr, client.eth)
 
 	if len(*senderPrivKey) > 0 {
 		privateKey, err := crypto.HexToECDSA(*senderPrivKey)
@@ -95,6 +80,32 @@ func main() {
 		user.addr = fromAddress
 		user.chainid = chainId
 	}
+
+	if len(*proxyaddr) > 0 {
+		ProxyGetContract(*proxyaddr, client.eth)
+		if len(*get) > 0 {
+			err = ProxyGetValue(*proxyaddr, *get, client.eth)
+			if err != nil {
+				log.Fatal("err ", err)
+			}
+		}
+		if len(*setaddr) > 0 {
+			err = ProxySetContract(*proxyaddr, *setaddr, client.eth)
+			if err != nil {
+				log.Fatal("proxy set contract err ", err)
+			}
+		}
+
+		return
+	}
+
+	if len(*addr) == 0 {
+		log.Fatal("no contract address")
+	}
+
+	SimpleInfo(*addr, client.eth)
+
+	
 	if len(*addAdmin) > 0 {
 		err = AddAdmin(*addr, *addAdmin, client.eth)
 		if err != nil {
