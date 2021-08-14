@@ -7,7 +7,7 @@ describe("Proxy", function () {
     await blockSet.deployed();
 
     const Proxy = await ethers.getContractFactory("Proxy");
-    const proxy = await proxy.deploy();
+    const proxy = await Proxy.deploy();
     await proxy.deployed();
 
     var txset = await proxy.setcontract(blockSet.address);
@@ -23,7 +23,7 @@ describe("Proxy", function () {
       await blockSet.deployed();
 
       const Proxy = await ethers.getContractFactory("Proxy");
-      const proxy = await proxy.deploy();
+      const proxy = await Proxy.deploy();
       await proxy.deployed();
 
       var txset = await proxy.setcontract(blockSet.address);
