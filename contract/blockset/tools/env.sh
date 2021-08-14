@@ -2,9 +2,13 @@
 testneturl="http://114.242.26.15:8006"
 mainneturl="https://hpbnode.com"
 
-testnetContract="0xA9eFD6E0Dd7322d32abdD06E9335183CAFDD64AA"
-mainnetContract="0xdCf64b3AFAD792197FFa9F60BCF7D9d213eEB68e"
+testnetContract="0xFBb92aF9ebFD6B27F980F04c80Fa68527F40Ea36"
+testnetProxy="0x31E035c9405950cafe24Db89c353D53714AAed53"
+mainnetContract="0x16f44F107A0D6eCd5ac38ee00864b8607E005d93"
+mainnetProxy="0xA83b0Ff8075EE46795f0a100fBdba1DA6F01c04d"
 
-PK="66458a382446fe61fbeffef9b2f0af0e1215281c19fd295edceef3e7d60ae2ff"
-url=$testneturl
-addr=$testnetContract
+
+PK=""
+url=$mainneturl
+addr=$mainnetContract
+proxy=$mainnetProxy

@@ -37,7 +37,7 @@ func GetAdmins(conAddr string, client *ethclient.Client) ([]common.Address, erro
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := &bind.CallOpts{}
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return nil, err
@@ -59,7 +59,7 @@ func GetOwner(conAddr string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := &bind.CallOpts{}
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -77,7 +77,7 @@ func ProxyGetValue(conAddr string, key string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := &bind.CallOpts{}
 
-	Proxy, err := proxy.NewContracts(cAddr, client)
+	Proxy, err := proxy.NewProxy(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -95,7 +95,7 @@ func ProxyGetContract(conAddr string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := &bind.CallOpts{}
 
-	Proxy, err := proxy.NewContracts(cAddr, client)
+	Proxy, err := proxy.NewProxy(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -114,7 +114,7 @@ func GetValue(conAddr string, key string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := &bind.CallOpts{}
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -133,7 +133,7 @@ func GetThreshold(conAddr string, key string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := &bind.CallOpts{}
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -166,7 +166,7 @@ func ChangeOwner(conAddr string, newOwner string, client *ethclient.Client) erro
 	addr := common.HexToAddress(newOwner)
 	defaultOpt := getTransactOpts()
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -187,7 +187,7 @@ func AddAdmin(conAddr string, admin string, client *ethclient.Client) error {
 	addr := common.HexToAddress(admin)
 	defaultOpt := getTransactOpts()
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -207,7 +207,7 @@ func DelAdmin(conAddr string, admin string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	addr := common.HexToAddress(admin)
 	defaultOpt := getTransactOpts()
-	govermentSet, err := blocksets.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -228,7 +228,7 @@ func AddProposal(conAddr string, key, val string, client *ethclient.Client) erro
 	pv, _ := new(big.Int).SetString(val, 10)
 	defaultOpt := getTransactOpts()
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -249,7 +249,7 @@ func ResetProposal(conAddr string, key, val string, client *ethclient.Client) er
 	pv, _ := new(big.Int).SetString(val, 10)
 	defaultOpt := getTransactOpts()
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -269,7 +269,7 @@ func VoteProposal(conAddr string, key string, client *ethclient.Client) error {
 	cAddr := common.HexToAddress(conAddr)
 	defaultOpt := getTransactOpts()
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -290,7 +290,7 @@ func SetThreshold(conAddr string, val string, client *ethclient.Client) error {
 	pv, _ := new(big.Int).SetString(val, 10)
 	defaultOpt := getTransactOpts()
 
-	govermentSet, err := blockset.NewContracts(cAddr, client)
+	govermentSet, err := blockset.NewBlockset(cAddr, client)
 	if err != nil {
 		//log.Println("newErc20 failed")
 		return err
@@ -308,7 +308,7 @@ func SetThreshold(conAddr string, val string, client *ethclient.Client) error {
 
 func Deploy(client *ethclient.Client) (common.Address, *types.Transaction, error) {
 	defaultOpt := getTransactOpts()
-	addr, tx, _, err := blockset.DeployContracts(defaultOpt, client)
+	addr, tx, _, err := blockset.DeployBlockset(defaultOpt, client)
 	if err != nil {
 		return common.Address{}, nil, err
 	}

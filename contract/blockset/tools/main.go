@@ -67,7 +67,7 @@ func main() {
 	var err error
 	client := NewHttpClient(*url)
 	chainId := client.ChainID()
-	if len(*proxy) > 0 {
+	if len(*proxyaddr) > 0 {
 		ProxyGetContract(*proxyaddr, client.eth)
 		if len(*get) > 0 {
 			err = ProxyGetValue(*proxyaddr, *get, client.eth)
