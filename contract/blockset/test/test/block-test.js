@@ -106,4 +106,40 @@ describe("BlockSet", function () {
   
     await expect(blockSet.getValue("test1")).to.revertedWith("VM Exception while processing transaction: reverted with reason string 'not valid'")
   });
+
+    it("Should change threshold", async function () {
+        const BlockSet = await ethers.getContractFactory("blockSet");
+        const blockSet = await BlockSet.deploy();
+        await blockSet.deployed();
+        var initThreshold = await blockSet.getThreshold();
+        expect(initThreshold==1);
+
+        // add proposal
+        const addProposalTx = await blockSet.addProposal("test1",1000);
+        await addProposalTx.wait();
+
+        var test1 = await blockSet.getValue("test1");
+        expect(test1==1000);
+
+        const addAdminTx1 = await blockSet.addAdmin("0x69DC6E2990C73B658DcbAB841c630F082AAAeD2D");
+        await addAdminTx1.wait();
+        const addAdminTx2 = await blockSet.addAdmin("0xcfCb3cB30C940614e18A3b53Ae9fa91a8592f417");
+        await addAdminTx2.wait();
+        var admins = await blockSet.getAdmins();
+        //console.log(admins);
+        expect(admins.length == 2);
+
+        const setTx= await blockSet.setThreshold(2);
+        await setTx.wait();
+
+        var threshold = await blockSet.getThreshold();
+        expect(threshold==2);
+
+        // reset proposal.
+        const resetProposalTx = await blockSet.resetProposal("test1",2000);
+        await resetProposalTx.wait();
+        // get proposal got old value.
+        test1 = await blockSet.getValue("test1");
+        expect(test1==1000);
+    });
 });

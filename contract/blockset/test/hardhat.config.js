@@ -37,5 +37,9 @@ module.exports = {
 			url: 'http://114.242.26.15:8006',
 			accounts,
 		},
+		mainnet: {
+			url: 'https://hpbnode.com',
+			accounts,
+		}
 	},
 };
