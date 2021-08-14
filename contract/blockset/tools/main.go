@@ -46,6 +46,7 @@ func SimpleInfo(conAddr string, client *ethclient.Client) {
 func main() {
 	url := flag.String("u", "http://127.0.0.1:8545", "rpc url")
 	senderPrivKey := flag.String("priv", "", "Sender private key in hex")
+	proxyaddr := flag.String("proxy", "", "proxy contract address")
 	addr := flag.String("addr", "", "contract address")
 	// admin
 	addAdmin := flag.String("addAdmin", "", "new admin address")
@@ -66,6 +67,17 @@ func main() {
 	var err error
 	client := NewHttpClient(*url)
 	chainId := client.ChainID()
+	if len(*proxy) > 0 {
+		ProxyGetContract(*proxyaddr, client.eth)
+		if len(*get) > 0 {
+			err = ProxyGetValue(*proxyaddr, *get, client.eth)
+			if err != nil {
+				log.Fatal("err ", err)
+			}
+		}
+		return
+	}
+
 	if len(*addr) == 0 {
 		log.Fatal("no contract address")
 	}
