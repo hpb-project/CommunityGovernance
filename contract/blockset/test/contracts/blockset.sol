@@ -1,7 +1,7 @@
 pragma solidity ^0.5.1;
 
 
-contract blockSet {
+contract BlockSet {
     struct BlockNumber {
         string  keywords;
         uint256 blockNumber;
@@ -12,6 +12,7 @@ contract blockSet {
     address private owner; // owner is always an admin.
     uint256 threshold;
     mapping(string => BlockNumber) blockmap; // keywords ==> blocknumber
+    mapping(string => BlockNumber) history;
     address[]  admins;
     string[]   proposalList;
     mapping(address => bool) mapAdmin;
@@ -115,8 +116,13 @@ contract blockSet {
     }
 
     function getValue(string calldata key) external view returns (uint256) {
-        require(blockmap[key].valid,"not valid");
-        return blockmap[key].blockNumber;
+        require(blockmap[key].valid || history[key].valid, "not valid");
+
+        if (blockmap[key].valid) {
+            return blockmap[key].blockNumber;
+        } else {
+            return history[key].blockNumber;
+        }
     }
 
     function addProposal(string memory key,uint256 number) public isAdmin {
@@ -129,6 +135,10 @@ contract blockSet {
         votes[key].push(msg.sender);
         if (votes[key].length >= newproposal.threshold) {
             newproposal.valid = true;
+
+            if (!history[key].valid) {
+                proposalList.push(key);
+            }
         } else {
             newproposal.valid = false;
         }
@@ -137,6 +147,11 @@ contract blockSet {
     }
 
     function resetProposal(string memory key,uint256 number) public isAdmin {
+        if (blockmap[key].valid) {
+            // backup to history.
+            history[key] = blockmap[key];
+        }
+
         delete blockmap[key];
         delete votes[key];
         addProposal(key, number);
@@ -152,7 +167,22 @@ contract blockSet {
         votes[key].push(msg.sender);
         if (votes[key].length >= blockmap[key].threshold){
             blockmap[key].valid = true;
+            if (!history[key].valid) {
+                proposalList.push(key);
+            }
         }
     }
 
+    function getVoter(string memory key) public returns (address [] memory) {
+        return votes[key];
+    }
+
+    function getProposals() public returns (string [] memory, uint256 [] memory) {
+        string[] memory list = proposalList;
+        uint256[] memory number = new uint256[](list.length);
+        for (uint256 i = 0; i < list.length; i++){
+            number[i] = getValue(list[i]);
+        }
+        return (list,number);
+    }
 }

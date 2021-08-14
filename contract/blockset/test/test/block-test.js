@@ -2,14 +2,14 @@ const { expect } = require("chai");
 
 describe("BlockSet", function () {
   it("Should got 0 admins", async function () {
-    const BlockSet = await ethers.getContractFactory("blockSet");
+    const BlockSet = await ethers.getContractFactory("BlockSet");
     const blockSet = await BlockSet.deploy();
     await blockSet.deployed();
 	  var admins = await blockSet.getAdmins();
 	  expect(admins.length == 0);
   });
   it("Should got 1 admins", async function () {
-    const BlockSet = await ethers.getContractFactory("blockSet");
+    const BlockSet = await ethers.getContractFactory("BlockSet");
     const blockSet = await BlockSet.deploy();
     await blockSet.deployed();
 
@@ -21,7 +21,7 @@ describe("BlockSet", function () {
 	  expect(admins.length == 1);
   });
   it("Should delete to 0 admins", async function () {
-    const BlockSet = await ethers.getContractFactory("blockSet");
+    const BlockSet = await ethers.getContractFactory("BlockSet");
     const blockSet = await BlockSet.deploy();
     await blockSet.deployed();
 
@@ -40,7 +40,7 @@ describe("BlockSet", function () {
 	  expect(admins.length == 0);
   });
   it("Should change owner", async function () {
-    const BlockSet = await ethers.getContractFactory("blockSet");
+    const BlockSet = await ethers.getContractFactory("BlockSet");
     const blockSet = await BlockSet.deploy();
     await blockSet.deployed();
 
@@ -53,7 +53,7 @@ describe("BlockSet", function () {
 	  //expect(owner.equal("0x69DC6E2990C73B658DcbAB841c630F082AAAeD2D"));
   });
   it("Should change threshold", async function () {
-    const BlockSet = await ethers.getContractFactory("blockSet");
+    const BlockSet = await ethers.getContractFactory("BlockSet");
     const blockSet = await BlockSet.deploy();
     await blockSet.deployed();
 	  var initThreshold = await blockSet.getThreshold();
@@ -73,7 +73,7 @@ describe("BlockSet", function () {
 	  expect(threshold==2);
   });
   it("Should got value ", async function () {
-    const BlockSet = await ethers.getContractFactory("blockSet");
+    const BlockSet = await ethers.getContractFactory("BlockSet");
     const blockSet = await BlockSet.deploy();
     await blockSet.deployed();
 	  const addProposalTx = await blockSet.addProposal("test1",1000);
@@ -83,7 +83,7 @@ describe("BlockSet", function () {
 	  expect(test1==1000);
   });
   it("Should revert", async function () {
-    const BlockSet = await ethers.getContractFactory("blockSet");
+    const BlockSet = await ethers.getContractFactory("BlockSet");
     const blockSet = await BlockSet.deploy();
     await blockSet.deployed();
 	  var initThreshold = await blockSet.getThreshold();
@@ -108,7 +108,7 @@ describe("BlockSet", function () {
   });
 
     it("Should change threshold", async function () {
-        const BlockSet = await ethers.getContractFactory("blockSet");
+        const BlockSet = await ethers.getContractFactory("BlockSet");
         const blockSet = await BlockSet.deploy();
         await blockSet.deployed();
         var initThreshold = await blockSet.getThreshold();

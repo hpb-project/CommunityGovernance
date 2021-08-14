@@ -1,7 +1,7 @@
 pragma solidity ^0.5.1;
 
 
-contract blockSet {
+contract BlockSet {
     struct BlockNumber {
         string  keywords;
         uint256 blockNumber;
@@ -135,6 +135,10 @@ contract blockSet {
         votes[key].push(msg.sender);
         if (votes[key].length >= newproposal.threshold) {
             newproposal.valid = true;
+
+            if (!history[key].valid) {
+                proposalList.push(key);
+            }
         } else {
             newproposal.valid = false;
         }
@@ -163,9 +167,22 @@ contract blockSet {
         votes[key].push(msg.sender);
         if (votes[key].length >= blockmap[key].threshold){
             blockmap[key].valid = true;
+            if (!history[key].valid) {
+                proposalList.push(key);
+            }
         }
     }
+
     function getVoter(string memory key) public returns (address [] memory) {
         return votes[key];
+    }
+
+    function getProposals() public returns (string [] memory, uint256 [] memory) {
+        string[] memory list = proposalList;
+        uint256[] memory number = new uint256[](list.length);
+        for (uint256 i = 0; i < list.length; i++){
+            number[i] = getValue(list[i]);
+        }
+        return (list,number);
     }
 }

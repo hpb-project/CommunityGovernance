@@ -14,12 +14,23 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const BlockSet = await hre.ethers.getContractFactory("blockSet");
+  const BlockSet = await hre.ethers.getContractFactory("BlockSet");
   const blockSet = await BlockSet.deploy();
 
   await blockSet.deployed();
 
   console.log("blockSet deployed to:", blockSet.address);
+
+  const Proxy = await hre.ethers.getContractFactory("Proxy");
+  const proxy = await Proxy.deploy();
+  await proxy.deployed();
+  console.log("proxy deployed at:", proxy.address);
+
+  var txset = await proxy.setcontract(blockSet.address);
+  await txset.wait();
+
+  var addr = await proxy.getcontract();
+  console.log("current blockset address is:", addr)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
