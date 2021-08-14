@@ -12,6 +12,7 @@ contract blockSet {
     address private owner; // owner is always an admin.
     uint256 threshold;
     mapping(string => BlockNumber) blockmap; // keywords ==> blocknumber
+    mapping(string => BlockNumber) history;
     address[]  admins;
     string[]   proposalList;
     mapping(address => bool) mapAdmin;
@@ -115,8 +116,13 @@ contract blockSet {
     }
 
     function getValue(string calldata key) external view returns (uint256) {
-        require(blockmap[key].valid,"not valid");
-        return blockmap[key].blockNumber;
+        require(blockmap[key].valid || history[key].valid, "not valid");
+
+        if (blockmap[key].valid) {
+            return blockmap[key].blockNumber;
+        } else {
+            return history[key].blockNumber;
+        }
     }
 
     function addProposal(string memory key,uint256 number) public isAdmin {
@@ -137,6 +143,11 @@ contract blockSet {
     }
 
     function resetProposal(string memory key,uint256 number) public isAdmin {
+        if (blockmap[key].valid) {
+            // backup to history.
+            history[key] = blockmap[key];
+        }
+
         delete blockmap[key];
         delete votes[key];
         addProposal(key, number);
@@ -154,5 +165,7 @@ contract blockSet {
             blockmap[key].valid = true;
         }
     }
-
+    function getVoter(string memory key) public returns (address [] memory) {
+        return votes[key];
+    }
 }
