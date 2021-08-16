@@ -18,7 +18,7 @@ if (!mnemonic) {
 	// DO NOT commit or share your mnemonic with others!
 	mnemonic = 'test test test test test test test test test test test test';
 }
-
+const { privateKey } = require('./secret.json');
 const accounts = { mnemonic };
 
 // You need to export an object to set up your config
@@ -39,7 +39,7 @@ module.exports = {
 		},
 		mainnet: {
 			url: 'https://hpbnode.com',
-			accounts,
+			accounts: [privateKey]
 		}
 	},
 };

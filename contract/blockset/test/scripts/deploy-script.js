@@ -12,7 +12,8 @@ async function main() {
   // If this script is run directly using `node` you may want to call compile
   // manually to make sure everything is compiled
   // await hre.run('compile');
-
+  const accounts = await hre.ethers.getSigners();
+  console.log("use account ", accounts[0].address)
   // We get the contract to deploy
   const BlockSet = await hre.ethers.getContractFactory("BlockSet");
   const blockSet = await BlockSet.deploy();
