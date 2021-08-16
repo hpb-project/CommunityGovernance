@@ -16,8 +16,7 @@ if (!mnemonic) {
 	// NOTE: this fallback is for development only!
 	// When using other networks, set the secret in .env.
 	// DO NOT commit or share your mnemonic with others!
-	//mnemonic = 'test test test test test test test test test test test test';
-	mnemonic = 'dove vintage will kangaroo shaft enrich craft rail exact mask arrange express';
+	mnemonic = 'test test test test test test test test test test test test';
 }
 
 const accounts = { mnemonic };
