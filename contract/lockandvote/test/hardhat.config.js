@@ -20,6 +20,7 @@ if (!mnemonic) {
         mnemonic = 'test test test test test test test test test test test test';        
 }
 const accounts = { mnemonic };
+const { privateKey } = require('./secret.json');
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -33,7 +34,11 @@ module.exports = {
       accounts:{
         accountsBalance:"800000000000000000000000"
       }
-    }
+    },
+    mainnet: {
+			url: 'https://hpbnode.com',
+			accounts: [privateKey]
+		}
   },
   solidity: "0.5.1",
 };
