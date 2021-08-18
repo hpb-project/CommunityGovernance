@@ -37,7 +37,7 @@ module.exports = {
     },
     mainnet: {
 			url: 'https://hpbnode.com',
-			accounts: [privateKey]
+			//accounts: [privateKey]
 		}
   },
   solidity: "0.5.1",

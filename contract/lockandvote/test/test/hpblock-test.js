@@ -12,6 +12,9 @@ async function delOneBoe(hpbNodes, coinbase) {
   await hpbNodes.deleteBoeNode(coinbase);
 }
 
+function wait(ms) {
+  return new Promise(resolve =>setTimeout(() =>resolve(), ms));
+};
 
 describe("HpbLock", function () {
   it("deploy hpbnodes and hpblock should successful", async function () {
@@ -87,6 +90,8 @@ describe("HpbLock", function () {
     expect(await hpbNodes.isLockNode(boeNodes)).to.true;
 
     // withdraw
+    await expect(hpbLocks.withdraw(boeNodes)).to.revertedWith("VM Exception while processing transaction: reverted with reason string 'not enough limit time'");
+    await wait(10000); // need set `lockLimitTime = 10` in lock.sol.
     await hpbLocks.withdraw(boeNodes);
     expect(await hpbNodes.isLockNode(boeNodes)).to.false;
   });
