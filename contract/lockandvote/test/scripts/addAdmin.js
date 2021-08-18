@@ -4,7 +4,7 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
-const proxyAddr = "0xbc98351fd96d02b19a9f127e261da8c073d8b4cf"
+const proxyAddr = "0x60a3698bE1493da2065E6F84B2E77B5b5D201D5D"
 async function main() {
   const proxy = await ethers.getContractAt("Proxy",proxyAddr);
   console.log("proxy deployed at:", proxy.address);
@@ -13,7 +13,7 @@ async function main() {
   console.log("current lock address is:", lock);
   console.log("current vote address is:", vote);
 
-  var addtx = await proxy.addAdmin(/* address */);
+  var addtx = await proxy.addAdmin("0xc1238F78df709AFaA8BFD9F80F1747c5b8177479");
   await addtx.wait();
 
   var admins = await proxy.getAdmins();

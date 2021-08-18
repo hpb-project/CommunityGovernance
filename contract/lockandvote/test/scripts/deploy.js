@@ -5,6 +5,10 @@
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
 
+function wait(ms) {
+  return new Promise(resolve =>setTimeout(() =>resolve(), ms));
+};
+
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
@@ -20,30 +24,36 @@ async function main() {
 
   const hpbNodes = await HpbNodes.deploy();
   await hpbNodes.deployed();
-  console.log("hpbNodes deployed to:", hpbNodes.address);
+  console.log("hpbNodes address:", hpbNodes.address);
 
   const hpbLocks = await HpbLocks.deploy();
   await hpbLocks.deployed();
-  console.log("hpbLocks deployed to:", hpbLocks.address);
+  console.log("hpbLocks address:", hpbLocks.address);
 
   const hpbVotes = await HpbVotes.deploy();
   await hpbVotes.deployed();
-  console.log("hpbVotes deployed to:", hpbVotes.address);
+  console.log("hpbVotes address:", hpbVotes.address);
   
-  await hpbNodes.setLockContract(hpbLocks.address);
+  var t1 = await hpbNodes.setLockContract(hpbLocks.address);
+  await t1.wait();
 
-  await hpbLocks.setNodeContract(hpbNodes.address);
+  var t2 = await hpbLocks.setNodeContract(hpbNodes.address);
+  await t2.wait();
 
-  await hpbVotes.setNodeContract(hpbNodes.address);
+  var t3 = await hpbVotes.setNodeContract(hpbNodes.address);
+  await t3.wait();
 
   const Proxy = await hre.ethers.getContractFactory("Proxy");
   const proxy = await Proxy.deploy();
   await proxy.deployed();
-  console.log("proxy deployed to:", proxy.address);
+  console.log("proxy address:", proxy.address);
+  var t4 = await proxy.setnodecontract(hpbNodes.address);
+  await t4.wait();
+  var t5 = await proxy.setvotecontract(hpbVotes.address);
+  await t5.wait();
+  var t6 = await proxy.setlockcontract(hpbLocks.address);
+  await t6.wait();
 
-  await proxy.setnodecontract(hpbNodes.address);
-  await proxy.setvotecontract(hpbVotes.address);
-  await proxy.setlockcontract(hpbLocks.address);
   console.log("after set contracts to proxy, deploy finished.")
 }
 
