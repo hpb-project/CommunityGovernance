@@ -13,10 +13,12 @@ async function main() {
   console.log("current lock address is:", lock);
   console.log("current vote address is:", vote);
 
-  var addtx = await proxy.addAdmin("0xc1238F78df709AFaA8BFD9F80F1747c5b8177479");
+  const nodeContract = await ethers.getContractAt("HpbNodes",node);
+  var addtx = await nodeContract.addAdmin("0xc1238F78df709AFaA8BFD9F80F1747c5b8177479");
+  console.log("txhash :",addtx.hash)
   await addtx.wait();
 
-  var admins = await proxy.getAdmins();
+  var admins = await nodeContract.getAdmins();
   console.log("total admins count ", admins.length)
   for (i=0;i<admins.length;i++) {
     console.log("have admin ", admins[i])
