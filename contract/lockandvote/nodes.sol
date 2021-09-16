@@ -273,10 +273,7 @@ contract HpbNodes is Ownable{
     function setHolderAddr(address holderAddr) public { //Boe地址调用此函数设置持币地址
         require(isBoeNode(msg.sender)); //只有boe地址能调用此函数
         require(holdertoboe[holderAddr] == address(0));//需要holderAddr未使用
-        address beforeholder = boetoholder[msg.sender]; //删除旧的持币地址
         boetoholder[msg.sender]=holderAddr;
-        holdertoboe[holderAddr] = msg.sender;
-        delete holdertoboe[beforeholder];
 		emit SetHolderAddr(msg.sender,holderAddr);
     }
     
