@@ -4,7 +4,8 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
-const proxyAddr = "0x60a3698bE1493da2065E6F84B2E77B5b5D201D5D"
+const proxyAddr = "0x60a3698bE1493da2065E6F84B2E77B5b5D201D5D" // mainnet
+//const proxyAddr = "0x2B21E06f11eFd1272691B62428E31513bF3B6F31"  // testnet
 async function main() {
   const proxy = await ethers.getContractAt("Proxy",proxyAddr);
   console.log("proxy deployed at:", proxy.address);
@@ -13,16 +14,13 @@ async function main() {
   console.log("current lock address is:", lock);
   console.log("current vote address is:", vote);
 
-  const nodeContract = await ethers.getContractAt("HpbNodes",node);
-  // var addtx = await nodeContract.addAdmin("0xc1238F78df709AFaA8BFD9F80F1747c5b8177479");
-  // console.log("txhash :",addtx.hash)
-  // await addtx.wait();
+  var coinbase = "";
 
-  var admins = await nodeContract.getAdmins();
-  console.log("total admins count ", admins.length)
-  for (i=0;i<admins.length;i++) {
-    console.log("have admin ", admins[i])
-  }
+  const nodeContract = await ethers.getContractAt("HpbNodes",node);
+
+  var delTx = await nodeContract.deleteBoeNode(coinbase);
+  console.log("del node", coinbase, " txhash: ",delTx.hash)
+  await delTx.wait();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -35,7 +35,7 @@ module.exports = {
 		},
 		testnet: {
 			url: 'http://114.242.26.15:8006',
-			accounts,
+			accounts: [privateKey]
 		},
 		mainnet: {
 			url: 'https://hpbnode.com',

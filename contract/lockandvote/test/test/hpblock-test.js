@@ -61,7 +61,7 @@ describe("HpbLock", function () {
     expect(await hpbNodes.isBoeNode(owner.address)).to.true;
     expect(await hpbNodes.isLockNode(owner.address)).to.false;
     // call stake with value.
-    await hpbLocks.stake(owner.address, { value: ethers.utils.parseEther('30000') });
+    await hpbLocks.stake(owner.address, { gasprice: 21000, value: ethers.utils.parseEther('30000') });
   });
 
   it("stake and withdraw", async function () {

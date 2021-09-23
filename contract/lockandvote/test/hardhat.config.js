@@ -35,9 +35,13 @@ module.exports = {
         accountsBalance:"800000000000000000000000"
       }
     },
+    testnet: {
+			url: 'http://114.242.26.15:8006',
+      accounts: [privateKey]
+		},
     mainnet: {
 			url: 'https://hpbnode.com',
-			//accounts: [privateKey]
+			accounts: [privateKey]
 		}
   },
   solidity: "0.5.1",
