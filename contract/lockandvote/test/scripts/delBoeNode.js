@@ -14,7 +14,7 @@ async function main() {
   console.log("current lock address is:", lock);
   console.log("current vote address is:", vote);
 
-  var coinbase = "";
+  var coinbase = "0x6e52d862253493cd86a353cb3b46665a172854ff";
 
   const nodeContract = await ethers.getContractAt("HpbNodes",node);
 

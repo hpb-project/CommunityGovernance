@@ -4,6 +4,8 @@
 *.dll
 *.so
 *.dylib
+secret.json
+.env.sh
 
 # Test binary, built with `go test -c`
 *.test
