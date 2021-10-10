@@ -92,7 +92,7 @@ contract HpbVote is Ownable {
         for (uint i=1;i<voterArray.length;i++) {
             if ( voterArray[i].voteNumber > 0 ) {
                 if (voterArray[i].voterAddr.balance < voterArray[i].voteNumber){
-                    docancelVote(voterArray[i].voterAddr);
+                    docancelPartVote(voterArray[i].voterAddr);
         	    }
             }
             //这里的分步操作需要一次交易才会继续执行，谁来发交易？
@@ -175,6 +175,19 @@ contract HpbVote is Ownable {
     	    voterArray[i].vote[voterArray[i].boes[j]].voteNumber = 0;
     	}
 	    voterArray[i].voteNumber = 0;
+    }
+
+    // voterArray[i].voterAddr.balance < voterArray[i].voteNumber
+    function docancelPartVote(address voteraddr) internal{
+        VoterIndex memory newindex = voterIndexMap[voteraddr];
+        require(newindex.coinbase == voteraddr);
+        uint i = newindex.index;
+        uint256 rate = voterArray[i].voterAddr.balance * 100 / voterArray[i].voteNumber;
+        for (uint j = 0; j < voterArray[i].boes.length; j++){ //撤销投票
+            voteresult[voterArray[i].boes[j]] = voteresult[voterArray[i].boes[j]].sub(voterArray[i].vote[voterArray[i].boes[j]].voteNumber * (100 - rate));
+    	    voterArray[i].vote[voterArray[i].boes[j]].voteNumber = voterArray[i].vote[voterArray[i].boes[j]].voteNumber * rate;
+    	}
+	    voterArray[i].voteNumber = voterArray[i].voterAddr.balance;
     }
     
     /**
@@ -340,10 +353,21 @@ contract HpbVote is Ownable {
     /**
      * 构造函数 初始化投票智能合约的部分依赖参数
      */
-    constructor () payable public {
+    constructor (address payable voteaddr) payable public {
         owner = msg.sender;
         // 设置默认管理员
         adminMap[owner] = owner;
+        
+        HpbVote prevote = HpbVote(voteaddr);
+        (address payable[] memory voters,uint[] memory bals) = prevote.fetchAllVoters();
+        for (uint256 i = 0;i < bals.length; i++){
+            (address[] memory boes,uint[] memory bal) = prevote.fetchVoteInfoForVoter(voters[i]);
+            for (uint256 j=0; j < boes.length; j++){
+                address payable boe = address(uint160(boes[j]));
+                copyvotedata(voters[i],boe,bal[j]);
+            }
+        }
+        
     }
     
     /**
@@ -352,6 +376,36 @@ contract HpbVote is Ownable {
 	function setGasLeftLimit(uint gasLeftLimit) onlyAdmin public returns (bool) {
         _gasLeftLimit=gasLeftLimit;
         return true;
+    }
+    
+    function copyvotedata(
+        address payable voter,
+        address payable boeaddr,
+        uint num
+    )  internal {
+        if (voterIndexMap[voter].coinbase == address(0)){
+            voterIndexMap[voter].coinbase = voter;
+            voterIndexMap[voter].index = voterArray.length;
+            Voter memory newvoter;
+            BoeIndex memory newboeindex;
+            newvoter.voterAddr = voter;
+            newvoter.voteNumber = num;
+            newboeindex.index = 0;
+            newboeindex.voteNumber = num;
+            newboeindex.coinbase = boeaddr;
+            voterArray.push(newvoter);
+            voterArray[voterArray.length-1].boes.push(boeaddr);
+            voterArray[voterArray.length-1].vote[boeaddr] = newboeindex;
+        }else{
+            voterArray[voterIndexMap[voter].index].voteNumber = num.add(voterArray[voterIndexMap[voter].index].voteNumber);
+            if (voterArray[voterIndexMap[voter].index].vote[boeaddr].coinbase == address(0)){//之前未给boeddr投过票
+                voterArray[voterIndexMap[voter].index].vote[boeaddr].index = voterArray[voterIndexMap[voter].index].boes.length;
+                voterArray[voterIndexMap[voter].index].vote[boeaddr].coinbase = boeaddr;
+                voterArray[voterIndexMap[voter].index].boes.push(boeaddr);
+            }
+            voterArray[voterIndexMap[voter].index].vote[boeaddr].voteNumber = num.add(voterArray[voterIndexMap[voter].index].vote[boeaddr].voteNumber);
+        }
+        voteresult[boeaddr] = num.add(voteresult[boeaddr]);
     }
     
 }

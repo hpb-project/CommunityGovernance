@@ -62,10 +62,9 @@ contract HpbLock is Ownable{
         return (nodeToLockAddr[nodeAddr],lockBal[nodeAddr]);
     }
     
-    constructor (
-    ) payable public {
+    constructor (address payable prelockaddr) payable public {
         owner = msg.sender;
-        addAdmin(owner);
+        addAdmin(owner);        
     }
     function () payable external {
         emit ReceivedHpb(

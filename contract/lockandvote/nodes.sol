@@ -62,9 +62,32 @@ contract HpbNodes is Ownable{
     address[] LockNodes;
     mapping (address => NodeIndex) LockNodesIndexMap;
     
-    constructor () payable public {
+    mapping (address => address) boetoholder;//boe节点地址=>持币地址
+    mapping (address => address) holdertoboe;//持币地址=》boe地址
+
+    constructor (address payable prenodeaddr) payable public {
         owner = msg.sender;
         addAdmin(owner);
+        HpbNodes prenode = HpbNodes(prenodeaddr);
+        prenode.getAllHpbNodes();
+        (address[] memory boes,bytes32[] memory cid1s,bytes32[] memory cid2s,bytes32[] memory hids )= prenode.getAllBoes();
+        for (uint256 i = 0; i < boes.length; i++){
+            address payable boe = address(uint160(boes[i]));
+            addBoeNode(boe,cid1s[i],cid2s[i],hids[i]);
+        }
+        
+        (address[] memory nodes, address[] memory holder) = prenode.fetchAllHolderAddrs();
+        for (uint256 j = 0; j < nodes.length; j++){
+            boetoholder[nodes[j]] = holder[j];
+            holdertoboe[holder[j]] = nodes[j];
+        }
+        
+        address payable[] memory lockaddrs = prenode.getAlllockNode();
+        for (uint256 i = 0; i < lockaddrs.length; i++) {
+            LockNodes.push(lockaddrs[i]);
+            LockNodesIndexMap[lockaddrs[i]].coinbase = lockaddrs[i];
+            LockNodesIndexMap[lockaddrs[i]].index = LockNodes.length-1;
+        }
     }
 
     /**
@@ -267,8 +290,7 @@ contract HpbNodes is Ownable{
         LockNodes.length--;
     }
     
-    mapping (address => address) boetoholder;//boe节点地址=>持币地址
-    mapping (address => address) holdertoboe;//持币地址=》boe地址
+
     //持币地址的设置需要双向确认
     function setHolderAddr(address holderAddr) public { //Boe地址调用此函数设置持币地址
         require(isBoeNode(msg.sender)); //只有boe地址能调用此函数
