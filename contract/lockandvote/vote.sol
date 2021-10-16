@@ -49,6 +49,12 @@ contract HpbVote is Ownable {
     // mapping (address => VoteInfo[]) voterinfos;
     mapping (address => uint) voteresult;//boe => num
     
+    
+    event dovotelog(address,address,uint);
+    event docancelvotelog(address);
+    event docancelPartVotelog(address,address,uint);
+    event cancelVoteForCandidatelog(address,address);
+    
     /**
      * 获取某个候选人被投票详细情况
      */
@@ -143,6 +149,7 @@ contract HpbVote is Ownable {
         }
         voteresult[boeaddr] = num.add(voteresult[boeaddr]);
         require(msg.sender.balance >= voterArray[voterIndexMap[msg.sender].index].voteNumber,"balance too low");
+        emit dovotelog(msg.sender,boeaddr,num);
     }
 
 
@@ -175,6 +182,7 @@ contract HpbVote is Ownable {
     	    voterArray[i].vote[voterArray[i].boes[j]].voteNumber = 0;
     	}
 	    voterArray[i].voteNumber = 0;
+	    emit docancelvotelog(voteraddr);
     }
 
     // voterArray[i].voterAddr.balance < voterArray[i].voteNumber
@@ -186,7 +194,8 @@ contract HpbVote is Ownable {
         for (uint j = 0; j < voterArray[i].boes.length; j++){ //撤销投票
             voteresult[voterArray[i].boes[j]] = voteresult[voterArray[i].boes[j]].sub(voterArray[i].vote[voterArray[i].boes[j]].voteNumber * (100 - rate));
     	    voterArray[i].vote[voterArray[i].boes[j]].voteNumber = voterArray[i].vote[voterArray[i].boes[j]].voteNumber * rate;
-    	}
+            emit docancelPartVotelog(voteraddr,voterArray[i].boes[j],voteresult[voterArray[i].boes[j]]);
+        }
 	    voterArray[i].voteNumber = voterArray[i].voterAddr.balance;
     }
     
@@ -206,6 +215,7 @@ contract HpbVote is Ownable {
     	        voterArray[i].vote[voterArray[i].boes[j]].voteNumber = 0;
             }
     	}
+    	emit cancelVoteForCandidatelog(msg.sender,boeaddr);
     }
     
     /**
@@ -358,13 +368,15 @@ contract HpbVote is Ownable {
         // 设置默认管理员
         adminMap[owner] = owner;
         
-        HpbVote prevote = HpbVote(voteaddr);
-        (address payable[] memory voters,uint[] memory bals) = prevote.fetchAllVoters();
-        for (uint256 i = 0;i < bals.length; i++){
-            (address[] memory boes,uint[] memory bal) = prevote.fetchVoteInfoForVoter(voters[i]);
-            for (uint256 j=0; j < boes.length; j++){
-                address payable boe = address(uint160(boes[j]));
-                copyvotedata(voters[i],boe,bal[j]);
+        if (voteaddr!= address(0)) {
+            HpbVote prevote = HpbVote(voteaddr);
+            (address payable[] memory voters,uint[] memory bals) = prevote.fetchAllVoters();
+            for (uint256 i = 0;i < bals.length; i++){
+                (address[] memory boes,uint[] memory bal) = prevote.fetchVoteInfoForVoter(voters[i]);
+                for (uint256 j=0; j < boes.length; j++){
+                    address payable boe = address(uint160(boes[j]));
+                    copyvotedata(voters[i],boe,bal[j]);
+                }
             }
         }
         
