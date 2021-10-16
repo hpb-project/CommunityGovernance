@@ -50,10 +50,10 @@ contract HpbVote is Ownable {
     mapping (address => uint) voteresult;//boe => num
     
     
-    event dovotelog(address,address,uint);
-    event docancelvotelog(address);
-    event docancelPartVotelog(address,address,uint);
-    event cancelVoteForCandidatelog(address,address);
+    event dovotelog(address indexed,address indexed,uint);
+    event docancelvotelog(address indexed);
+    event docancelPartVotelog(address indexed,address indexed,uint);
+    event cancelVoteForCandidatelog(address indexed,address indexed);
     
     /**
      * 获取某个候选人被投票详细情况
