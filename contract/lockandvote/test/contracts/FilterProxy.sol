@@ -94,13 +94,57 @@ contract FilterProxy is Ownable{
         address payable[] memory, 
         uint[] memory
     ){
-        return hpbvote.fetchAllVoteResult();
+        uint256 count = 0;
+        address payable [] memory _coinbase = new address payable[](1);
+        uint[] memory _votes = new uint[](1);
+        (_coinbase, _votes) = hpbvote.fetchAllVoteResult();
+
+        for(uint256 i=0; i < _coinbase.length; i++) {
+            if(blacklist[_coinbase[i]] == false) {
+	    	    count += 1;
+            }
+        }
+        address payable [] memory _filter_coinbase = new address payable[](count);
+        uint[] memory _filter_votes = new uint[](count);
+        
+        uint256 index = 0;
+        for(uint256 i=0; i < _coinbase.length; i++) {
+            if(blacklist[_coinbase[i]] == false) {
+                _filter_coinbase[index] = _coinbase[i];
+                _filter_votes[index] = _votes[i];
+	            index += 1;
+            }
+        }
+        
+        return (_filter_coinbase, _filter_votes);
     }
 
     function fetchAllHolderAddrs() public view returns(
         address [] memory,
-        address [] memory){
-        return hpbnode.fetchAllHolderAddrs();
+        address [] memory) {
+        uint256 count = 0;
+        address [] memory _coinbase = new address [](1);
+        address [] memory _holder   = new address [](1);
+        (_coinbase, _holder) = hpbnode.fetchAllHolderAddrs();
+
+        for(uint256 i=0; i < _coinbase.length; i++) {
+            if(blacklist[_coinbase[i]] == false) {
+	    	    count += 1;
+            }
+        }
+        address [] memory _filter_coinbase = new address [](count);
+        address [] memory _filter_holder   = new address[](count);
+        
+        uint256 index = 0;
+        for(uint256 i=0; i < _coinbase.length; i++) {
+            if(blacklist[_coinbase[i]] == false) {
+                _filter_coinbase[index] = _coinbase[i];
+                _filter_holder[index] = _holder[i];
+	            index += 1;
+            }
+        }
+        
+        return (_filter_coinbase, _filter_holder);
     }
 
 }
