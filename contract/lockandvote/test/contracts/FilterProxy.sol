@@ -16,13 +16,13 @@ interface IHpbLock {
 
 
 contract FilterProxy is Ownable{
-    mapping (address=>bool) blacklist;
+    mapping (address=>bool) public blacklist;
     
     IHpbNodes hpbnode;
     IHpbVote  hpbvote;
     IHpbLock  hpblock;
 
-    constructor () payable public {
+    constructor () public {
         owner = msg.sender;
         addAdmin(owner);
     }
@@ -60,11 +60,11 @@ contract FilterProxy is Ownable{
     ) {
 
         uint256 count = 0;
-        address payable [] memory _coinbase = new address payable[](1);
-        bytes32[] memory _cid1s = new bytes32[](1);
-        bytes32[] memory _cid2s = new bytes32[](1);
-        bytes32[] memory _hids = new bytes32[](1);
-        (_coinbase, _cid1s, _cid2s, _hids) = hpbnode.getAllHpbNodes();
+        //address payable [] memory _coinbase = new address payable[](1);
+        //bytes32[] memory _cid1s = new bytes32[](1);
+        //bytes32[] memory _cid2s = new bytes32[](1);
+        //bytes32[] memory _hids = new bytes32[](1);
+        (address payable [] memory _coinbase, bytes32[] memory _cid1s, bytes32[] memory _cid2s, bytes32[] memory _hids) = hpbnode.getAllHpbNodes();
 
         for(uint256 i=0; i < _coinbase.length; i++) {
             if(blacklist[_coinbase[i]] == false) {
@@ -95,9 +95,9 @@ contract FilterProxy is Ownable{
         uint[] memory
     ){
         uint256 count = 0;
-        address payable [] memory _coinbase = new address payable[](1);
-        uint[] memory _votes = new uint[](1);
-        (_coinbase, _votes) = hpbvote.fetchAllVoteResult();
+        //address payable [] memory _coinbase = new address payable[](1);
+        //uint[] memory _votes = new uint[](1);
+        (address payable [] memory _coinbase, uint[] memory _votes) = hpbvote.fetchAllVoteResult();
 
         for(uint256 i=0; i < _coinbase.length; i++) {
             if(blacklist[_coinbase[i]] == false) {
@@ -123,9 +123,9 @@ contract FilterProxy is Ownable{
         address [] memory,
         address [] memory) {
         uint256 count = 0;
-        address [] memory _coinbase = new address [](1);
-        address [] memory _holder   = new address [](1);
-        (_coinbase, _holder) = hpbnode.fetchAllHolderAddrs();
+        //address [] memory _coinbase = new address [](1);
+        //address [] memory _holder   = new address [](1);
+        (address [] memory _coinbase, address [] memory _holder) = hpbnode.fetchAllHolderAddrs();
 
         for(uint256 i=0; i < _coinbase.length; i++) {
             if(blacklist[_coinbase[i]] == false) {
