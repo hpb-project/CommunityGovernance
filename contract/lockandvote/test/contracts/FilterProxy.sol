@@ -17,6 +17,10 @@ interface IHpbLock {
 
 contract FilterProxy is Ownable{
     mapping (address=>bool) public blacklist;
+    address [] blackminer;
+
+    uint256 public maxblackcount = 10;
+    uint256 public curblackcount = 0;
     
     IHpbNodes hpbnode;
     IHpbVote  hpbvote;
@@ -25,6 +29,26 @@ contract FilterProxy is Ownable{
     constructor () public {
         owner = msg.sender;
         addAdmin(owner);
+    }
+
+    function _addBlackMiner(address addr) internal {
+	if (blackminer.length > curblackcount) {
+		blackminer[curblackcount+1] = addr;
+        } else {
+		blackminer.push(addr);
+        }
+	curblackcount += 1;
+    }
+
+    function _rmBlackMiner(address addr) internal {
+	for(uint256 i = 0; i < curblackcount; i++) {
+		if(blackminer[i] == addr) {
+			blackminer[i] = blackminer[curblackcount];
+			delete(blackminer[curblackcount]);
+			curblackcount -= 1;
+			break;
+                }
+        }
     }
 
     function setnodecontract(address payable nodeaddr) onlyAdmin public{
@@ -40,11 +64,24 @@ contract FilterProxy is Ownable{
     }
 
     function addInvalidNode(address addr) onlyAdmin public {
-        blacklist[addr] = true;
+	require(blacklist[addr] == false, "already exist in blacklist");
+	require(curblackcount < maxblackcount,"exceed max black miner count");
+	blacklist[addr] = true;
+	_addBlackMiner(addr);
     }
 
     function removeInvalidNode(address addr) onlyAdmin public {
-        blacklist[addr] = false;
+	require(blacklist[addr] == true, "unknown black miner");
+	_rmBlackMiner(addr);
+	blacklist[addr] = false;
+    }
+
+    function getBlackList() public view returns(address []memory) {
+	address [] memory retlist = new address[](curblackcount);
+	for(uint256 i = 0; i < curblackcount; i++) {
+		retlist[i] = blackminer[i];
+        }
+	return retlist;
     }
 
     function getcontract() public view returns(address,address,address){
@@ -60,10 +97,6 @@ contract FilterProxy is Ownable{
     ) {
 
         uint256 count = 0;
-        //address payable [] memory _coinbase = new address payable[](1);
-        //bytes32[] memory _cid1s = new bytes32[](1);
-        //bytes32[] memory _cid2s = new bytes32[](1);
-        //bytes32[] memory _hids = new bytes32[](1);
         (address payable [] memory _coinbase, bytes32[] memory _cid1s, bytes32[] memory _cid2s, bytes32[] memory _hids) = hpbnode.getAllHpbNodes();
 
         for(uint256 i=0; i < _coinbase.length; i++) {
@@ -95,8 +128,6 @@ contract FilterProxy is Ownable{
         uint[] memory
     ){
         uint256 count = 0;
-        //address payable [] memory _coinbase = new address payable[](1);
-        //uint[] memory _votes = new uint[](1);
         (address payable [] memory _coinbase, uint[] memory _votes) = hpbvote.fetchAllVoteResult();
 
         for(uint256 i=0; i < _coinbase.length; i++) {
@@ -123,8 +154,6 @@ contract FilterProxy is Ownable{
         address [] memory,
         address [] memory) {
         uint256 count = 0;
-        //address [] memory _coinbase = new address [](1);
-        //address [] memory _holder   = new address [](1);
         (address [] memory _coinbase, address [] memory _holder) = hpbnode.fetchAllHolderAddrs();
 
         for(uint256 i=0; i < _coinbase.length; i++) {
