@@ -1,5 +1,6 @@
 pragma solidity ^0.5.1;
 import "./owner.sol";
+import "hardhat/console.sol";
 
 interface IHpbNodes {
     function fetchAllHolderAddrs() external view returns(address [] memory, address [] memory);
@@ -32,22 +33,22 @@ contract FilterProxy is Ownable{
     }
 
     function _addBlackMiner(address addr) internal {
-	if (blackminer.length > curblackcount) {
-		blackminer[curblackcount+1] = addr;
+        if (blackminer.length > curblackcount) {
+            blackminer[curblackcount] = addr;
         } else {
-		blackminer.push(addr);
+		    blackminer.push(addr);
         }
-	curblackcount += 1;
+	    curblackcount += 1;
     }
 
     function _rmBlackMiner(address addr) internal {
-	for(uint256 i = 0; i < curblackcount; i++) {
-		if(blackminer[i] == addr) {
-			blackminer[i] = blackminer[curblackcount];
-			delete(blackminer[curblackcount]);
-			curblackcount -= 1;
-			break;
-                }
+        for(uint256 i = 0; i < curblackcount; i++) {
+            if(blackminer[i] == addr) {
+                blackminer[i] = blackminer[curblackcount-1];
+                blackminer[curblackcount-1] = address(0);
+                curblackcount -= 1;
+                break;
+            }
         }
     }
 
@@ -63,17 +64,24 @@ contract FilterProxy is Ownable{
         hpblock = IHpbLock(lockaddr);
     }
 
+    function setMaxLimit(uint256 limit) onlyAdmin public{
+        require(limit >= 10, "can not limit little than 10");
+        require(limit <= 50, "can not limit more than 50");
+        require(limit > curblackcount, "can not limit little than curblackcount");
+        maxblackcount = limit;
+    }
+
     function addInvalidNode(address addr) onlyAdmin public {
-	require(blacklist[addr] == false, "already exist in blacklist");
-	require(curblackcount < maxblackcount,"exceed max black miner count");
-	blacklist[addr] = true;
-	_addBlackMiner(addr);
+        require(blacklist[addr] == false, "already exist in blacklist");
+        require(curblackcount < maxblackcount,"exceed max black miner count");
+        blacklist[addr] = true;
+        _addBlackMiner(addr);
     }
 
     function removeInvalidNode(address addr) onlyAdmin public {
-	require(blacklist[addr] == true, "unknown black miner");
-	_rmBlackMiner(addr);
-	blacklist[addr] = false;
+	    require(blacklist[addr] == true, "unknown black miner");
+	    _rmBlackMiner(addr);
+	    blacklist[addr] = false;
     }
 
     function getBlackList() public view returns(address []memory) {
