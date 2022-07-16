@@ -37,7 +37,7 @@ async function initaddr() {
   var hpbLocks = "0x74054455F954E1DDAf0694d906e4e68D63a33A18";
   var hpbVotes = "0x35a3445C0ca0B01B7CEA2F867D762f6410c9e952";
   var proxy = "0x60a3698bE1493da2065E6F84B2E77B5b5D201D5D";
-  var filterproxy = "0x115eB6E6DA16B8b951E1d7ef03AF466C883a362C";
+  var filterproxy = "0x303632d9E171a130B85ee1a23cD5902e5a2F7A51"; // mainnet address.
 
   var contractMap = new Map();
 
@@ -68,9 +68,8 @@ async function rmInvalidNode(contract, address) {
 
 async function testGetAllHpbNodes(contractMap) {
 
-	//await rmInvalidNode(contractMap.get("filterproxy"),"0x94724bb354b29f0797019506763e14b9d586e7be");
-	await addInvalidNode(contractMap.get("filterproxy"),"0x94724bb354b29f0797019506763e14b9d586e7be");
-	await addInvalidNode(contractMap.get("filterproxy"),"0xd866a6884a5b4b848fe8d02a2dbc08002385be31");
+	await addInvalidNode(contractMap.get("filterproxy"),"0x94724bB354B29f0797019506763e14B9d586e7Be"); // xueqiu
+	//await addInvalidNode(contractMap.get("filterproxy"),"0xd866a6884a5b4b848fe8d02a2dbc08002385be31");
 	//await addInvalidNode(contractMap.get("filterproxy"),"0x99ae5303e81a4371d9043a8554e365a84566fe86");
 	//await addInvalidNode(contractMap.get("filterproxy"),"0x6f75fc8088b2a1d77f1da71507f812513080084b");
 	//await addInvalidNode(contractMap.get("filterproxy"),"0x86306221af2e82e1203a29188964cca48c49dd78");
@@ -93,8 +92,6 @@ async function testGetAllHpbNodes(contractMap) {
 
 async function testFetchAllVoteResult(contractMap) {
 
-	// await addInvalidNode(contractMap.get("filterproxy"),"0xAe43e6D43FD29100fAca6d2AeD1dFBF5EdcBD41B");
-	// await addInvalidNode(contractMap.get("filterproxy"),"0xF583c835961e669556448B80E4e0e491c7eE6C26");
 	{
 		var [coinbases,votes] = await contractMap.get("filterproxy").fetchAllVoteResult();
 		console.log("filter proxy get vote length is", coinbases.length);
@@ -113,8 +110,6 @@ async function testFetchAllVoteResult(contractMap) {
 
 async function testFetchAllHolderAddrs(contractMap) {
 
-	// await addInvalidNode(contractMap.get("filterproxy"),"0xAe43e6D43FD29100fAca6d2AeD1dFBF5EdcBD41B");
-	// await addInvalidNode(contractMap.get("filterproxy"),"0xF583c835961e669556448B80E4e0e491c7eE6C26");
 	{
 		var [coinbases,holders] = await contractMap.get("filterproxy").fetchAllHolderAddrs();
 		console.log("filter proxy get holders length is", coinbases.length);
@@ -168,7 +163,9 @@ async function main() {
     await testGetAllHpbNodes(contractMap);
     await testFetchAllVoteResult(contractMap);
     await testFetchAllHolderAddrs(contractMap);
-    await testMaxCount(contractMap);
+    //await testMaxCount(contractMap);
+
+    // warning: this is danger for mainnet.
     //await updateProxy(contractMap);
 }
 
